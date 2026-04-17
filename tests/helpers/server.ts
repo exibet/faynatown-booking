@@ -47,9 +47,14 @@ function stubFetchGuard() {
 // H3 + Nitro globals and server auto-imports
 // ---------------------------------------------------------------------------
 
-function createHttpError(opts: { statusCode: number, message: string }) {
-  const err = new Error(opts.message) as Error & { statusCode: number }
+function createHttpError(opts: { statusCode: number, message?: string, statusMessage?: string }) {
+  const message = opts.message ?? opts.statusMessage ?? ''
+  const err = new Error(message) as Error & {
+    statusCode: number
+    statusMessage?: string
+  }
   err.statusCode = opts.statusCode
+  err.statusMessage = opts.statusMessage ?? opts.message
   return err
 }
 
@@ -78,13 +83,29 @@ function stubServerGlobals(opts: ServerStubOptions = {}) {
   vi.stubGlobal('setCookie', vi.fn())
   vi.stubGlobal('deleteCookie', vi.fn())
 
-  // Project auto-imports
-  vi.stubGlobal('requireAuth', async (event: { context: { token: string | null } }) => {
+  // Project auto-imports (match production signatures — requireAuth is sync)
+  vi.stubGlobal('requireAuth', (event: { context: { token: string | null } }) => {
     const token = opts.token ?? event.context.token
     if (token) return token
-    throw createHttpError({ statusCode: 401, message: 'Unauthorized' })
+    throw createHttpError({ statusCode: 401, statusMessage: 'Unauthorized' })
   })
-  vi.stubGlobal('validateBody', async (event: { _body: unknown }) => event._body)
+  vi.stubGlobal('validateBody', async (
+    event: { _body: unknown },
+    schema: { safeParse: (input: unknown) => {
+      success: boolean
+      data?: unknown
+      error?: { issues: { path: (string | number)[], message: string }[] }
+    } },
+  ) => {
+    const result = schema.safeParse(event._body)
+    if (!result.success) {
+      const first = result.error?.issues[0]
+      const path = first?.path.join('.') || 'body'
+      const message = first?.message || 'Invalid request'
+      throw createHttpError({ statusCode: 400, statusMessage: `${path}: ${message}` })
+    }
+    return result.data
+  })
   vi.stubGlobal('$faynatown', opts.faynatown ?? vi.fn())
 }
 
