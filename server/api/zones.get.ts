@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { BOOKING_TYPE_PARAMS } from '#shared/constants'
 import type { ZoneItem, ZoneResponse } from '#shared/types'
-import { isLabelUnavailable, stripUnavailableSuffix } from '~~/server/utils/slot-parser'
+import { stripUnavailableSuffix } from '~~/server/utils/slot-parser'
 import { toUpstreamBookingDate } from '~~/server/utils/date'
 import { getDefaultFlatId } from '~~/server/utils/flats'
 
@@ -43,10 +43,9 @@ export default defineEventHandler(async (event): Promise<ZoneItem[]> => {
 })
 
 function mapZone(z: ZoneResponse): ZoneItem {
-  const available = z.isAvaliable === true && !isLabelUnavailable(z.name)
   return {
     id: z.id,
     name: stripUnavailableSuffix(z.name),
-    available,
+    available: !!z.isAvaliable,
   }
 }

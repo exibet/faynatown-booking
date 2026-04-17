@@ -24,7 +24,7 @@ function mapBooking(b: BookingResponse): BookingItem {
     end: b.bookingEnd,
     details: b.bookingDetails,
     typeId: b.type,
-    isActive: b.isActive === true,
-    canCancel: b.allowDelete === true && b.notAllowDelete !== true,
+    isActive: !!b.isActive,
+    canCancel: !!b.allowDelete && !b.notAllowDelete,
   }
 }

@@ -8,9 +8,9 @@ const SLOT_RE = /з (\d{2}):(\d{2}) по (\d{2}):(\d{2})/
  * (optionally suffixed with `(недоступно)` / `(зайнято)`) into a typed
  * CalendarSlot.
  *
- * Availability rules:
- * - `isAvaliable === true` (preserve API typo) AND no unavailable suffix → available
- * - Otherwise → unavailable
+ * Availability comes from the API contract field `isAvaliable` (API's typo
+ * preserved). Suffix text is only stripped for display — never used as a
+ * validation signal, since the wording could change across API versions.
  */
 export function parseTimeSlot(raw: TimeSlotResponse): CalendarSlot | null {
   const match = SLOT_RE.exec(raw.slotValidated)
@@ -21,20 +21,18 @@ export function parseTimeSlot(raw: TimeSlotResponse): CalendarSlot | null {
   const endHour = Number.parseInt(match[3], 10)
   const endMin = Number.parseInt(match[4] ?? '0', 10)
 
-  const available = raw.isAvaliable === true && !isLabelUnavailable(raw.slotValidated)
-
   return {
     time: `${pad(startHour)}:${pad(startMin)}-${pad(endHour)}:${pad(endMin)}`,
     startHour,
     endHour,
-    available,
+    available: !!raw.isAvaliable,
     rawLabel: stripUnavailableSuffix(raw.slotValidated),
   }
 }
 
 /**
- * Removes `(недоступно)` / `(зайнято)` suffix from any label text so UI can
- * render just the semantic content.
+ * Removes `(недоступно)` / `(зайнято)` suffix from any label so UI can render
+ * just the semantic content. Display-only — never couple validation to text.
  */
 export function stripUnavailableSuffix(label: string): string {
   let result = label
@@ -42,14 +40,6 @@ export function stripUnavailableSuffix(label: string): string {
     result = result.replace(suffix, '').trim()
   }
   return result
-}
-
-/**
- * Checks whether a zone/slot label has an unavailable marker.
- * Used when the API omits `isAvaliable` and only signals via text.
- */
-export function isLabelUnavailable(label: string): boolean {
-  return UNAVAILABLE_SUFFIXES.some(s => label.includes(s))
 }
 
 function pad(n: number): string {

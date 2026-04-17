@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  isLabelUnavailable,
-  parseTimeSlot,
-  stripUnavailableSuffix,
-} from '~~/server/utils/slot-parser'
+import { parseTimeSlot, stripUnavailableSuffix } from '~~/server/utils/slot-parser'
 
 describe('parseTimeSlot', () => {
   it('parses an available 1h slot', () => {
@@ -25,15 +21,14 @@ describe('parseTimeSlot', () => {
     expect(result?.available).toBe(true)
   })
 
-  it('marks slot unavailable when suffix is present AND isAvaliable is absent', () => {
+  it('marks slot unavailable when isAvaliable is absent', () => {
     const result = parseTimeSlot({ slotValidated: 'з 09:00 по 10:00 (недоступно)' })
     expect(result?.available).toBe(false)
-    expect(result?.rawLabel).toBe('з 09:00 по 10:00')
   })
 
-  it('marks slot unavailable when isAvaliable is absent (no suffix)', () => {
-    const result = parseTimeSlot({ slotValidated: 'з 09:00 по 10:00' })
-    expect(result?.available).toBe(false)
+  it('strips the suffix from rawLabel for display', () => {
+    const result = parseTimeSlot({ slotValidated: 'з 09:00 по 10:00 (недоступно)' })
+    expect(result?.rawLabel).toBe('з 09:00 по 10:00')
   })
 
   it('returns null for unparseable input', () => {
@@ -57,19 +52,5 @@ describe('stripUnavailableSuffix', () => {
 
   it('returns input unchanged when no suffix', () => {
     expect(stripUnavailableSuffix('Бесідка 1')).toBe('Бесідка 1')
-  })
-})
-
-describe('isLabelUnavailable', () => {
-  it('detects (зайнято)', () => {
-    expect(isLabelUnavailable('Бесідка 5 (зайнято)')).toBe(true)
-  })
-
-  it('detects (недоступно)', () => {
-    expect(isLabelUnavailable('з 07:00 по 08:00 (недоступно)')).toBe(true)
-  })
-
-  it('returns false for clean labels', () => {
-    expect(isLabelUnavailable('Бесідка 1')).toBe(false)
   })
 })
