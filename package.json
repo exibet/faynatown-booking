@@ -1,0 +1,57 @@
+{
+  "name": "faynatown-booking",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
+    "test": "vitest",
+    "test:run": "vitest run",
+    "test:coverage": "vitest run --project node --coverage",
+    "test:nuxt": "vitest run --project nuxt",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "typecheck": "nuxt typecheck",
+    "build": "nuxt build",
+    "prepare": "husky"
+  },
+  "dependencies": {
+    "@fullcalendar/core": "^6.1.20",
+    "@fullcalendar/daygrid": "^6.1.20",
+    "@fullcalendar/timegrid": "^6.1.20",
+    "@fullcalendar/vue3": "^6.1.20",
+    "@nuxtjs/i18n": "^10.2.4",
+    "@primeuix/themes": "^2.0.3",
+    "nuxt": "^4.4.2",
+    "primevue": "^4.5.5",
+    "vue": "^3.5.32",
+    "vue-router": "^5.0.4",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@nuxt/eslint": "^1.15.2",
+    "@nuxt/test-utils": "^4.0.0",
+    "@playwright/test": "^1.59.1",
+    "@primevue/nuxt-module": "^4.5.5",
+    "@tailwindcss/vite": "^4.2.2",
+    "@vitest/coverage-istanbul": "^4.1.4",
+    "@vitest/coverage-v8": "^4.1.4",
+    "@vue/language-core": "^3.2.6",
+    "@vue/test-utils": "^2.4.6",
+    "happy-dom": "^20.8.9",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "primeicons": "^7.0.0",
+    "tailwindcss": "^4.2.2",
+    "tailwindcss-primeui": "^0.6.1",
+    "vitest": "^4.1.2",
+    "vue-tsc": "^3.2.6"
+  },
+  "lint-staged": {
+    "*.{ts,vue,mjs}": "eslint --fix"
+  }
+}
