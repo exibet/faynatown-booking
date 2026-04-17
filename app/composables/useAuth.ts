@@ -1,7 +1,13 @@
 import { API } from '#shared/api'
+import { AUTH_COOKIE_NAME } from '#shared/constants'
+import { STATE_KEY } from '#shared/state-keys'
 
 export function useAuth() {
-  const isLoggedIn = useState<boolean>('auth:is-logged-in', () => false)
+  const cookie = useCookie<string | null>(AUTH_COOKIE_NAME)
+  // Initialise from the cookie so SSR renders the authenticated UI when the
+  // user already has a valid session. `useState` shares the value between
+  // server and client, so hydration stays consistent.
+  const isLoggedIn = useState<boolean>(STATE_KEY.IS_LOGGED_IN, () => !!cookie.value)
 
   async function login(phoneNumber: string, password: string) {
     await $fetch(API.AUTH_LOGIN, {
@@ -21,6 +27,7 @@ export function useAuth() {
       // swallow — nothing actionable for the user
     }
     isLoggedIn.value = false
+    cookie.value = null
     await navigateTo('/login')
   }
 

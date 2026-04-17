@@ -17,6 +17,12 @@ const redirectTo = computed(() => {
   return typeof param === 'string' ? param : '/'
 })
 
+// Redirect in setup so it runs on SSR too — no flash of the login form
+// for users who are already signed in.
+if (isLoggedIn.value) {
+  await navigateTo(redirectTo.value)
+}
+
 async function handleSubmit() {
   if (loading.value) return
   loading.value = true
@@ -35,10 +41,6 @@ async function handleSubmit() {
     loading.value = false
   }
 }
-
-onMounted(() => {
-  if (isLoggedIn.value) navigateTo(redirectTo.value)
-})
 </script>
 
 <template>

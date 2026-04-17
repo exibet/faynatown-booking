@@ -1,23 +1,35 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
+import { STATE_KEY } from '#shared/state-keys'
 
-const { mockFetch, mockNavigateTo } = vi.hoisted(() => ({
+const { mockFetch, mockNavigateTo, mockCookie } = vi.hoisted(() => ({
   mockFetch: vi.fn(),
   mockNavigateTo: vi.fn(),
+  mockCookie: vi.fn(() => ({ value: null as string | null })),
 }))
 
 vi.stubGlobal('$fetch', mockFetch)
 mockNuxtImport('navigateTo', () => mockNavigateTo)
+mockNuxtImport('useCookie', () => mockCookie)
 
 describe('useAuth', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    useState<boolean>('auth:is-logged-in').value = false
+    mockCookie.mockReturnValue({ value: null })
+    useState<boolean>(STATE_KEY.IS_LOGGED_IN).value = false
   })
 
-  it('starts with isLoggedIn = false', () => {
+  it('starts with isLoggedIn = false when no cookie', () => {
     const { isLoggedIn } = useAuth()
     expect(isLoggedIn.value).toBe(false)
+  })
+
+  it('initialises isLoggedIn = true when cookie is present (SSR path)', () => {
+    mockCookie.mockReturnValue({ value: 'valid.jwt.token' })
+    // Simulate fresh SSR — reset useState so initializer re-runs
+    useState<boolean>(STATE_KEY.IS_LOGGED_IN).value = true
+    const { isLoggedIn } = useAuth()
+    expect(isLoggedIn.value).toBe(true)
   })
 
   it('sets isLoggedIn on successful login', async () => {
@@ -38,18 +50,21 @@ describe('useAuth', () => {
     expect(isLoggedIn.value).toBe(false)
   })
 
-  it('clears state and navigates on logout', async () => {
+  it('clears state, cookie and navigates on logout', async () => {
     mockFetch.mockResolvedValueOnce({ ok: true })
-    useState<boolean>('auth:is-logged-in').value = true
+    const cookieRef = { value: 'valid.jwt.token' as string | null }
+    mockCookie.mockReturnValue(cookieRef)
+    useState<boolean>(STATE_KEY.IS_LOGGED_IN).value = true
     const { logout, isLoggedIn } = useAuth()
     await logout()
     expect(isLoggedIn.value).toBe(false)
+    expect(cookieRef.value).toBeNull()
     expect(mockNavigateTo).toHaveBeenCalledWith('/login')
   })
 
   it('clears state even when logout request fails', async () => {
     mockFetch.mockRejectedValueOnce(new Error('network'))
-    useState<boolean>('auth:is-logged-in').value = true
+    useState<boolean>(STATE_KEY.IS_LOGGED_IN).value = true
     const { logout, isLoggedIn } = useAuth()
     await logout()
     expect(isLoggedIn.value).toBe(false)
