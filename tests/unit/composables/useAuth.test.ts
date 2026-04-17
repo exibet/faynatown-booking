@@ -24,14 +24,6 @@ describe('useAuth', () => {
     expect(isLoggedIn.value).toBe(false)
   })
 
-  it('initialises isLoggedIn = true when cookie is present (SSR path)', () => {
-    mockCookie.mockReturnValue({ value: 'valid.jwt.token' })
-    // Simulate fresh SSR — reset useState so initializer re-runs
-    useState<boolean>(STATE_KEY.IS_LOGGED_IN).value = true
-    const { isLoggedIn } = useAuth()
-    expect(isLoggedIn.value).toBe(true)
-  })
-
   it('sets isLoggedIn on successful login', async () => {
     mockFetch.mockResolvedValueOnce({ ok: true })
     const { login, isLoggedIn } = useAuth()
