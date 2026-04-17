@@ -1,3 +1,14 @@
+<script setup lang="ts">
+const { t, locale } = useI18n()
+useHead({
+  htmlAttrs: { lang: locale },
+  titleTemplate: title => (title ? `${title}` : t('app.title')),
+})
+</script>
+
 <template>
-  <NuxtPage />
+  <div>
+    <Toast />
+    <NuxtPage />
+  </div>
 </template>

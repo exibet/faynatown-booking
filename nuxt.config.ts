@@ -3,10 +3,20 @@ import Aura from '@primeuix/themes/aura'
 
 export default defineNuxtConfig({
 
-  modules: ['@primevue/nuxt-module', '@nuxtjs/i18n'],
+  modules: ['@primevue/nuxt-module', '@nuxtjs/i18n', '@nuxtjs/color-mode'],
   devtools: { enabled: true },
 
   css: ['~/assets/css/main.css'],
+
+  // @nuxtjs/color-mode manages `.dark` class on <html> via an inline script
+  // that runs before hydration — cookie-persisted, no FOUC.
+  colorMode: {
+    preference: 'system',
+    fallback: 'light',
+    classSuffix: '',
+    storage: 'cookie',
+    storageKey: 'faynatown-color-mode',
+  },
 
   devServer: {
     port: 3500,

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 useHead({ title: 'Faynatown Booking — Тест' })
 
-const isDark = ref(false)
+const colorMode = useColorMode()
+const isDark = computed(() => colorMode.value === 'dark')
 const selectedType = ref('Paddle_Tennis')
 
 const bookingTypes = [
@@ -28,8 +29,7 @@ const mockGrid: SlotState[][] = [
 ]
 
 function toggleDark() {
-  isDark.value = !isDark.value
-  document.documentElement.classList.toggle('dark', isDark.value)
+  colorMode.preference = isDark.value ? 'light' : 'dark'
 }
 
 const CELL_STYLES: Record<SlotState, string> = {
