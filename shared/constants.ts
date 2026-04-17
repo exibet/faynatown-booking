@@ -9,14 +9,15 @@ export const BOOKING_TYPES = [
 
 export type BookingTypeParam = typeof BOOKING_TYPES[number]['param']
 
-export const BOOKING_TYPE_PARAMS: readonly BookingTypeParam[] = [
+// Tuple (not array) so Zod's `z.enum` accepts it without a cast.
+export const BOOKING_TYPE_PARAMS = [
   'BBQ',
   'Tennis',
   'Basketball',
   'Volleyball',
   'Football',
   'Paddle_Tennis',
-]
+] as const satisfies readonly BookingTypeParam[]
 
 // Slot duration per booking type, used to render calendar grid.
 export const SLOT_DURATION_HOURS: Record<BookingTypeParam, number> = {

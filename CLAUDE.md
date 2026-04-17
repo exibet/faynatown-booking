@@ -67,7 +67,7 @@ These are non-obvious behaviors of the upstream Faynatown API. Getting any of th
 - **`version: 45` header is mandatory on every request** — otherwise API returns 400. Centralize in `$faynatown()` util, never send a request without it.
 - **Login returns plain-string JWT**, not JSON. Do NOT parse `response.json()` — read as text. Token is ~90-day validity.
 - **Field name typo: `isAvaliable`** (not `isAvailable`) — preserve as-is in types. Do not "fix" it, API will not match.
-- **Unavailability is encoded in text, not flags.** When a slot/zone is unavailable, `slotValidated` / `name` has `(недоступно)` or `(зайнято)` suffixed AND the `isAvaliable` field is absent (not `false`). Check both the suffix and field presence.
+- **Unavailability is encoded by FIELD ABSENCE, not `false`.** When a slot/zone is unavailable, the `isAvaliable` field is **omitted** from the JSON (API never returns `isAvaliable: false`). The text also gets `(недоступно)` / `(зайнято)` suffixed, but that's for display only — **do not use the text to validate availability**. Wording is localized and could change across API versions; field presence is the contract. Correct check: `item.isAvaliable === true`. Strip the text suffix with `stripUnavailableSuffix` before rendering.
 - **Dates have no timezone.** Responses return `2026-04-17T00:00:00` — parse as local time. Never treat as UTC or ISO with Z.
 - **`/booking/zones` `slot` param is URL-encoded Ukrainian text** like `з 07:00 по 08:00`. Use `encodeURIComponent()` — it is NOT a time range in standard format.
 
