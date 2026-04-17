@@ -1,0 +1,62 @@
+{
+  "app": {
+    "title": "Faynatown — Booking"
+  },
+  "auth": {
+    "phone": "Phone number",
+    "phonePlaceholder": "380...",
+    "password": "Password",
+    "login": "Sign in",
+    "logout": "Sign out",
+    "loginError": "Invalid phone number or password",
+    "sessionExpired": "Session expired, sign in again"
+  },
+  "calendar": {
+    "today": "Today",
+    "prev": "Previous week",
+    "next": "Next week",
+    "available": "Free",
+    "unavailable": "Busy",
+    "mine": "Mine",
+    "allOccupied": "Everything is booked this week",
+    "updatedAgo": "Updated {minutes} min ago",
+    "updatedJustNow": "Just updated",
+    "refresh": "Refresh",
+    "loading": "Loading calendar…"
+  },
+  "zones": {
+    "title": "Available courts",
+    "occupied": "occupied",
+    "noZones": "No courts available",
+    "loading": "Loading courts…"
+  },
+  "bookings": {
+    "title": "My bookings",
+    "active": "Active",
+    "past": "Past",
+    "cancel": "Cancel",
+    "cancelConfirm": "Cancel this booking?",
+    "cancelled": "Booking cancelled",
+    "noBookings": "No active bookings",
+    "loading": "Loading bookings…"
+  },
+  "theme": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  },
+  "types": {
+    "BBQ": "Gazebos (BBQ)",
+    "Tennis": "Tennis",
+    "Basketball": "Basketball",
+    "Volleyball": "Volleyball",
+    "Football": "Football",
+    "Paddle_Tennis": "Padel"
+  },
+  "errors": {
+    "network": "Check your Internet connection",
+    "generic": "Something went wrong",
+    "unauthorized": "Authentication required",
+    "versionRequired": "A new version is available — reload the page"
+  }
+}

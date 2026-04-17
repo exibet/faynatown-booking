@@ -3,7 +3,7 @@ import Aura from '@primeuix/themes/aura'
 
 export default defineNuxtConfig({
 
-  modules: ['@primevue/nuxt-module'],
+  modules: ['@primevue/nuxt-module', '@nuxtjs/i18n'],
   devtools: { enabled: true },
 
   css: ['~/assets/css/main.css'],
@@ -15,6 +15,15 @@ export default defineNuxtConfig({
 
   vite: {
     plugins: [tailwindcss()],
+  },
+
+  i18n: {
+    locales: [
+      { code: 'uk', name: 'Українська', file: 'uk.json' },
+      { code: 'en', name: 'English', file: 'en.json' },
+    ],
+    defaultLocale: 'uk',
+    strategy: 'no_prefix',
   },
 
   primevue: {
