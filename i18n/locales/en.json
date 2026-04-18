@@ -3,6 +3,10 @@
     "title": "Faynatown — Booking",
     "choose": "Choose"
   },
+  "meta": {
+    "description": "A convenient booking calendar for Faynatown residents — padel, BBQ, football, basketball, volleyball all in one view.",
+    "loginTitle": "Sign in"
+  },
   "auth": {
     "phone": "Phone number",
     "phonePlaceholder": "380...",

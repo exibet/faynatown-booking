@@ -6,7 +6,11 @@ const toast = useToast()
 
 definePageMeta({ layout: false })
 
-// Title comes from `app.vue`'s `titleTemplate` fallback — no per-page `useHead`.
+// Login page is the only surface crawlers / link scrapers see without auth —
+// give it a page-specific title so `<title>` reads "Увійти · Файна Таун — Бронювання".
+useSeoMeta({
+  title: () => t('meta.loginTitle'),
+})
 
 const phoneNumber = ref('')
 const password = ref('')
