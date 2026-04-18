@@ -1,19 +1,11 @@
 <script setup lang="ts">
-// Default layout is currently a bare shell. Phase 5 will add AppHeader
-// with calendar controls (type filter, week nav, theme toggle, logout).
+// Layout is intentionally bare — calendar pages own their full-viewport shell
+// (.ft-app for desktop, .mob for mobile). Wrapped in a div so Vue's
+// no-multiple-template-root rule allows the slot.
 </script>
 
 <template>
-  <div class="layout-root">
+  <div>
     <slot />
   </div>
 </template>
-
-<style scoped>
-@reference "tailwindcss";
-
-.layout-root {
-  @apply min-h-screen bg-white text-zinc-900 transition-colors;
-  @apply dark:bg-zinc-950 dark:text-zinc-100;
-}
-</style>

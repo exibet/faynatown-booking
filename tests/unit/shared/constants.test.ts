@@ -1,14 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import {
+  AUTH_COOKIE_MAX_AGE_SECONDS,
+  AUTH_COOKIE_NAME,
   BOOKING_TYPES,
   BOOKING_TYPE_PARAMS,
-  SLOT_DURATION_HOURS,
-  OPERATING_HOURS,
-  UNAVAILABLE_SUFFIXES,
+  DEFAULT_BOOKING_TYPE,
   FAYNATOWN_API_VERSION,
   FAYNATOWN_BASE_URL,
-  AUTH_COOKIE_NAME,
-  AUTH_COOKIE_MAX_AGE_SECONDS,
+  OPERATING_HOURS,
+  UNAVAILABLE_SUFFIXES,
+  findBookingType,
+  typeIdOf,
 } from '#shared/constants'
 
 describe('shared/constants', () => {
@@ -21,16 +23,19 @@ describe('shared/constants', () => {
     expect(BOOKING_TYPE_PARAMS).toEqual(BOOKING_TYPES.map(t => t.param))
   })
 
-  it('SLOT_DURATION_HOURS has entry for every booking type', () => {
+  it('every booking type declares positive slotMinutes', () => {
     for (const type of BOOKING_TYPES) {
-      expect(SLOT_DURATION_HOURS[type.param]).toBeGreaterThan(0)
+      expect(type.slotMinutes).toBeGreaterThan(0)
     }
   })
 
   it('BBQ has 4-hour slots, sports have 1-hour slots', () => {
-    expect(SLOT_DURATION_HOURS.BBQ).toBe(4)
-    expect(SLOT_DURATION_HOURS.Paddle_Tennis).toBe(1)
-    expect(SLOT_DURATION_HOURS.Tennis).toBe(1)
+    const bbq = findBookingType('BBQ')
+    const paddle = findBookingType('Paddle_Tennis')
+    const tennis = findBookingType('Tennis')
+    expect(bbq?.slotMinutes).toBe(240)
+    expect(paddle?.slotMinutes).toBe(60)
+    expect(tennis?.slotMinutes).toBe(60)
   })
 
   it('OPERATING_HOURS has valid range for every booking type', () => {
@@ -40,6 +45,22 @@ describe('shared/constants', () => {
       expect(hours.start).toBeGreaterThanOrEqual(0)
       expect(hours.end).toBeLessThanOrEqual(24)
     }
+  })
+
+  it('Tennis is the only hidden type (shares court with Volleyball)', () => {
+    const hidden = BOOKING_TYPES.filter(b => !b.visible)
+    expect(hidden).toHaveLength(1)
+    expect(hidden[0]?.param).toBe('Tennis')
+  })
+
+  it('findBookingType returns the matching meta or undefined', () => {
+    expect(findBookingType('BBQ')?.id).toBe(1)
+    expect(findBookingType('Paddle_Tennis')?.id).toBe(6)
+  })
+
+  it('typeIdOf returns the id for a known type', () => {
+    expect(typeIdOf('BBQ')).toBe(1)
+    expect(typeIdOf(DEFAULT_BOOKING_TYPE)).toBe(6)
   })
 
   it('UNAVAILABLE_SUFFIXES contains both Ukrainian suffixes', () => {

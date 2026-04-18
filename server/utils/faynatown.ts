@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { FAYNATOWN_API_VERSION, FAYNATOWN_BASE_URL } from '#shared/constants'
+import { AUTH_COOKIE_NAME, FAYNATOWN_API_VERSION, FAYNATOWN_BASE_URL } from '#shared/constants'
 
 interface FaynatownOptions {
   method?: 'GET' | 'POST'
@@ -23,6 +23,11 @@ interface FaynatownOptions {
  * - `version: 45` header on EVERY request, otherwise API returns 400
  * - `Authorization: Bearer <jwt>` from event context (cookie)
  * - Login returns plain-text JWT (not JSON) — pass `asText: true`
+ *
+ * On upstream 401 we proactively clear our auth cookie so the next request
+ * is correctly redirected to /login by the route middleware. Without this,
+ * a stale-but-present cookie can cause a redirect loop (middleware allows
+ * → data 401 → redirect → middleware allows → ...).
  *
  * Throws H3Error with upstream status preserved.
  */
@@ -69,6 +74,9 @@ export async function $faynatown<T>(
   })
 
   if (!response.ok) {
+    if (response.status === 401 && !options.skipAuth) {
+      deleteCookie(event, AUTH_COOKIE_NAME)
+    }
     const errorText = await response.text().catch(() => '')
     throw createError({
       statusCode: response.status,
@@ -78,7 +86,10 @@ export async function $faynatown<T>(
   }
 
   if (options.asText) return response.text()
-  return response.json() as Promise<T>
+  // Trust boundary: upstream JSON is not validated at runtime (no Zod here).
+  // The generic T is asserted by the caller (server route owns the contract).
+  const data: unknown = await response.json()
+  return data as T
 }
 
 function safeParseJson(text: string): string | Record<string, unknown> {

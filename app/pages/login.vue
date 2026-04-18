@@ -6,7 +6,7 @@ const toast = useToast()
 
 definePageMeta({ layout: false })
 
-useHead({ title: () => t('app.title') })
+// Title comes from `app.vue`'s `titleTemplate` fallback — no per-page `useHead`.
 
 const phoneNumber = ref('')
 const password = ref('')
@@ -17,8 +17,11 @@ const redirectTo = computed(() => {
   return typeof param === 'string' ? param : '/'
 })
 
-// Redirect in setup so it runs on SSR too — no flash of the login form
-// for users who are already signed in.
+// We intentionally do NOT redirect on cookie presence here. `useAuth`'s
+// `isLoggedIn` is now state-only (true after explicit login or after the
+// auth middleware verified the cookie on SSR for a protected route). If a
+// genuinely-logged-in user types /login, they'll see the form again — minor
+// UX trade-off vs. risking a redirect loop with stale cookies.
 if (isLoggedIn.value) {
   await navigateTo(redirectTo.value)
 }
@@ -28,16 +31,18 @@ async function handleSubmit() {
   loading.value = true
   try {
     await login(phoneNumber.value, password.value)
+    // Hard reload (not navigateTo) — the auth cookie is httpOnly so a SPA
+    // navigation can't see it on the client. A full page load lets the
+    // server-side render with the cookie attached, populating useAsyncData
+    // for calendar/bookings/flats from the start.
+    if (typeof window !== 'undefined') {
+      window.location.assign(redirectTo.value)
+      return
+    }
     await navigateTo(redirectTo.value)
   }
   catch {
-    toast.add({
-      severity: 'error',
-      summary: t('auth.loginError'),
-      life: 4000,
-    })
-  }
-  finally {
+    toast.error(t('auth.loginError'))
     loading.value = false
   }
 }
@@ -55,56 +60,34 @@ async function handleSubmit() {
 
       <label class="login-field">
         <span>{{ t('auth.phone') }}</span>
-        <InputText
+        <input
           v-model="phoneNumber"
+          class="login-input"
           :placeholder="t('auth.phonePlaceholder')"
           autocomplete="tel"
           inputmode="tel"
           required
-        />
+        >
       </label>
 
       <label class="login-field">
         <span>{{ t('auth.password') }}</span>
-        <InputText
+        <input
           v-model="password"
+          class="login-input"
           type="password"
           autocomplete="current-password"
           required
-        />
+        >
       </label>
 
-      <Button
+      <button
         type="submit"
-        :label="t('auth.login')"
-        :loading="loading"
-        class="w-full"
-      />
+        class="login-submit"
+        :disabled="loading"
+      >
+        {{ loading ? '…' : t('auth.login') }}
+      </button>
     </form>
   </div>
 </template>
-
-<style scoped>
-@reference "tailwindcss";
-
-.login-root {
-  @apply min-h-screen flex items-center justify-center bg-white px-4;
-  @apply dark:bg-zinc-950;
-}
-
-.login-card {
-  @apply w-full max-w-sm p-6 flex flex-col gap-4 rounded-lg border;
-  @apply border-zinc-200 bg-white;
-  @apply dark:border-zinc-800 dark:bg-zinc-900;
-}
-
-.login-title {
-  @apply text-xl font-semibold text-zinc-900 text-center;
-  @apply dark:text-zinc-100;
-}
-
-.login-field {
-  @apply flex flex-col gap-1 text-sm;
-  @apply text-zinc-700 dark:text-zinc-300;
-}
-</style>

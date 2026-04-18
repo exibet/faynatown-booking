@@ -1,6 +1,7 @@
 {
   "app": {
-    "title": "Faynatown — Booking"
+    "title": "Faynatown — Booking",
+    "choose": "Choose"
   },
   "auth": {
     "phone": "Phone number",
@@ -11,52 +12,73 @@
     "loginError": "Invalid phone number or password",
     "sessionExpired": "Session expired, sign in again"
   },
+  "header": {
+    "flat": "Flat",
+    "type": "Type"
+  },
   "calendar": {
     "today": "Today",
+    "tomorrow": "Tomorrow",
     "prev": "Previous week",
     "next": "Next week",
+    "prevDay": "Previous day",
+    "nextDay": "Next day",
     "available": "Free",
     "unavailable": "Busy",
-    "mine": "Mine",
-    "allOccupied": "Everything is booked this week",
+    "mine": "Yours",
+    "allOccupied": "All booked",
     "updatedAgo": "Updated {minutes} min ago",
     "updatedJustNow": "Just updated",
     "refresh": "Refresh",
-    "loading": "Loading calendar…"
+    "occupancy": "Load",
+    "noSlots": "No slots today"
   },
   "zones": {
-    "title": "Available courts",
-    "occupied": "occupied",
+    "chooseCourt": "Choose court",
+    "chooseZone": "Choose zone",
+    "chooseGazebo": "Choose gazebo",
+    "court": "Court",
+    "zone": "Zone",
+    "availableOne": "available",
+    "availableFew": "available",
+    "availableMany": "available",
     "noZones": "No courts available",
-    "loading": "Loading courts…"
+    "zonePrefix": "Zone"
   },
   "bookings": {
     "title": "My bookings",
-    "active": "Active",
+    "upcoming": "Upcoming",
     "past": "Past",
     "cancel": "Cancel",
-    "cancelConfirm": "Cancel this booking?",
+    "cancelTitle": "Cancel this booking?",
+    "cancelConfirm": "Cancel",
+    "keep": "Keep",
     "cancelled": "Booking cancelled",
-    "noBookings": "No active bookings",
-    "loading": "Loading bookings…"
+    "cancelFailed": "Cancel failed. Try again.",
+    "noBookings": "No active bookings"
   },
   "theme": {
-    "light": "Light",
-    "dark": "Dark",
-    "system": "System"
+    "toggle": "Toggle theme"
+  },
+  "lang": {
+    "toggle": "Toggle language"
   },
   "types": {
     "BBQ": "Gazebos (BBQ)",
     "Tennis": "Tennis",
     "Basketball": "Basketball",
-    "Volleyball": "Volleyball",
+    "Volleyball": "Volleyball / Tennis",
     "Football": "Football",
-    "Paddle_Tennis": "Padel"
+    "Paddle_Tennis": "Padel",
+    "courts": "courts",
+    "zones": "zones"
   },
   "errors": {
     "network": "Check your Internet connection",
-    "generic": "Something went wrong",
-    "unauthorized": "Authentication required",
-    "versionRequired": "A new version is available — reload the page"
+    "generic": "Something went wrong"
+  },
+  "common": {
+    "close": "Close",
+    "profile": "Profile"
   }
 }
