@@ -2,6 +2,7 @@ import { API } from '#shared/api'
 import { FETCH_KEY } from '#shared/fetch-keys'
 import { STATE_KEY } from '#shared/state-keys'
 import type { Flat } from '#shared/types'
+import { initialOnlyCache } from '~/utils/async-data'
 
 /**
  * Flat STATE accessor. Reads data via `useNuxtData` so the SSR-fetched flats
@@ -47,10 +48,7 @@ export function useFlatSync() {
     () => api<Flat[]>(API.FLATS),
     {
       default: () => [],
-      getCachedData: (key, nuxtApp, ctx) => {
-        if (ctx.cause === 'initial') return nuxtApp.payload.data[key]
-        return undefined
-      },
+      getCachedData: initialOnlyCache,
     },
   )
 }

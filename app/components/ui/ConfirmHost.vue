@@ -7,6 +7,8 @@ function onKey(event: KeyboardEvent) {
   if (event.key === 'Enter') answer(true)
 }
 
+// Confirm dialog also listens to Enter, so `useEscape` (Escape-only) isn't
+// a clean fit — wire the keydown manually here.
 onMounted(() => window.addEventListener('keydown', onKey))
 onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 </script>

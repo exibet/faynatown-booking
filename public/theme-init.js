@@ -13,6 +13,8 @@
     document.documentElement.setAttribute('data-theme', theme)
   }
   catch (e) {
-    document.documentElement.setAttribute('data-theme', 'dark')
+    var fallbackLight = window.matchMedia
+      && window.matchMedia('(prefers-color-scheme: light)').matches
+    document.documentElement.setAttribute('data-theme', fallbackLight ? 'light' : 'dark')
   }
 })()

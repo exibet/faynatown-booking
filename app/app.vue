@@ -1,15 +1,11 @@
 <script setup lang="ts">
 const { t, locale } = useI18n()
-const theme = useTheme()
 
 useHead({
   htmlAttrs: { lang: locale },
   titleTemplate: title => (title ? `${title}` : t('app.title')),
 })
-
-onMounted(() => {
-  theme.init()
-})
+// Theme init runs in plugins/theme.client.ts — no need to wire it here.
 </script>
 
 <template>

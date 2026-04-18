@@ -1,21 +1,10 @@
 <script setup lang="ts">
-import type { BookingItem } from '#shared/types'
-import { fmtMonthDay, fmtTimeHHMM, parseLocalDateTime } from '~/utils/datetime'
-
 defineProps<{ open: boolean }>()
 const emit = defineEmits<{ (e: 'close'): void }>()
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
 const { upcoming, past, upcomingCount, cancel, pending } = useBookings()
 const confirm = useConfirm()
-
-function whenLabel(b: BookingItem): string {
-  const start = parseLocalDateTime(b.start)
-  const end = parseLocalDateTime(b.end)
-  const startMin = start.getHours() * 60 + start.getMinutes()
-  const endMin = end.getHours() * 60 + end.getMinutes()
-  return `${fmtMonthDay(start, locale.value === 'uk' ? 'uk' : 'en')} · ${fmtTimeHHMM(startMin)}–${fmtTimeHHMM(endMin)}`
-}
 
 async function onCancel(id: number) {
   const ok = await confirm.ask({
@@ -56,29 +45,14 @@ async function onCancel(id: number) {
       {{ t('bookings.noBookings') }}
     </div>
 
-    <div
+    <BookingCard
       v-for="b in upcoming"
       v-else
       :key="b.id"
-      class="sh-bk"
-    >
-      <div class="sh-bk-body">
-        <div class="sh-bk-title">
-          {{ b.zoneName }}
-        </div>
-        <div class="sh-bk-when">
-          {{ whenLabel(b) }}
-        </div>
-      </div>
-      <button
-        v-if="b.canCancel"
-        type="button"
-        class="sh-bk-cancel"
-        @click="onCancel(b.id)"
-      >
-        {{ t('bookings.cancel') }}
-      </button>
-    </div>
+      :booking="b"
+      variant="upcoming"
+      @cancel="onCancel"
+    />
 
     <div
       v-if="past.length > 0"
@@ -87,19 +61,11 @@ async function onCancel(id: number) {
     >
       <span>{{ t('bookings.past') }}</span>
     </div>
-    <div
+    <BookingCard
       v-for="b in past.slice(0, 8)"
       :key="b.id"
-      class="sh-bk is-past"
-    >
-      <div class="sh-bk-body">
-        <div class="sh-bk-title">
-          {{ b.zoneName }}
-        </div>
-        <div class="sh-bk-when">
-          {{ whenLabel(b) }}
-        </div>
-      </div>
-    </div>
+      :booking="b"
+      variant="past"
+    />
   </BottomSheet>
 </template>

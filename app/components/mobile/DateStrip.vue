@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { dayShortName, sameDay, useToday } from '~/utils/datetime'
+import { sameDay } from '#shared/utils/datetime'
+import { dayShortName, useToday } from '~/utils/datetime'
 
 const props = defineProps<{
   weekDates: readonly Date[]
@@ -12,7 +13,8 @@ const emit = defineEmits<{
   (e: 'prev' | 'next'): void
 }>()
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
+const appLocale = useAppLocale()
 const today = useToday()
 
 interface DayCell {
@@ -28,7 +30,7 @@ const cells = computed<DayCell[]>(() => {
   return props.weekDates.map((d, idx) => ({
     index: idx,
     date: d,
-    name: dayShortName(d, locale.value === 'uk' ? 'uk' : 'en'),
+    name: dayShortName(d, appLocale.value),
     num: String(d.getDate()).padStart(2, '0'),
     isPast: d < today.value && !sameDay(d, today.value),
     isActive: idx === props.selectedIndex,

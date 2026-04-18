@@ -1,11 +1,31 @@
 import { API } from '#shared/api'
 import { FETCH_KEY } from '#shared/fetch-keys'
 import { STATE_KEY } from '#shared/state-keys'
+import { DEFAULT_BOOKING_TYPE } from '#shared/constants'
 import type { BookingTypeParam } from '#shared/constants'
 import type { CalendarWeek } from '#shared/types'
-import { addDays, formatLocalDate, parseLocalDate, todayLocal } from '~/utils/datetime'
+import { addDays, formatLocalDate, parseLocalDate, todayLocal } from '#shared/utils/datetime'
+import { initialOnlyCache } from '~/utils/async-data'
 
-const DEFAULT_TYPE: BookingTypeParam = 'Paddle_Tennis'
+// Private state keys shared between useCalendar() and useCalendarSync().
+// Grouped here so a typo creates a compile error instead of a silent second
+// state instance.
+const K = {
+  WEEK_ANCHOR: STATE_KEY.WEEK_ANCHOR,
+  SELECTED_TYPE: STATE_KEY.SELECTED_TYPE,
+  PENDING: 'cal:pending',
+  LAST_UPDATED: 'cal:last-updated',
+  REFRESH_TICK: 'cal:refresh-tick',
+} as const
+
+function calendarState() {
+  const weekAnchor = useState<Date>(K.WEEK_ANCHOR, () => todayLocal())
+  const selectedType = useState<BookingTypeParam>(K.SELECTED_TYPE, () => DEFAULT_BOOKING_TYPE)
+  const pending = useState<boolean>(K.PENDING, () => false)
+  const lastUpdated = useState<Date | null>(K.LAST_UPDATED, () => null)
+  const refreshTick = useState<number>(K.REFRESH_TICK, () => 0)
+  return { weekAnchor, selectedType, pending, lastUpdated, refreshTick }
+}
 
 /**
  * Calendar STATE accessor — returns reactive state and navigation actions
@@ -19,11 +39,7 @@ const DEFAULT_TYPE: BookingTypeParam = 'Paddle_Tennis'
  * setup, causing hydration mismatches between SSR and client.
  */
 export function useCalendar() {
-  const weekAnchor = useState<Date>(STATE_KEY.WEEK_ANCHOR, () => todayLocal())
-  const selectedType = useState<BookingTypeParam>(STATE_KEY.SELECTED_TYPE, () => DEFAULT_TYPE)
-  const pending = useState<boolean>('cal:pending', () => false)
-  const lastUpdated = useState<Date | null>('cal:last-updated', () => null)
-  const refreshTrigger = useState<number>('cal:refresh-tick', () => 0)
+  const { weekAnchor, selectedType, pending, lastUpdated, refreshTick } = calendarState()
 
   const nuxtData = useNuxtData<CalendarWeek>(FETCH_KEY.CALENDAR)
   const week = computed<CalendarWeek>(() => nuxtData.data.value ?? [])
@@ -62,7 +78,7 @@ export function useCalendar() {
   }
 
   function refresh(): void {
-    refreshTrigger.value += 1
+    refreshTick.value += 1
   }
 
   return {
@@ -73,7 +89,7 @@ export function useCalendar() {
     week,
     pending: readonly(pending),
     lastUpdated: readonly(lastUpdated),
-    refreshTrigger: readonly(refreshTrigger),
+    refreshTrigger: readonly(refreshTick),
     canPrevWeek,
     prevWeek,
     nextWeek,
@@ -86,18 +102,13 @@ export function useCalendar() {
 
 /**
  * Calendar DATA SYNC — registers the `useAsyncData` fetch. MUST be called
- * exactly once per page (in `DesktopApp` / `MobileApp` setup), otherwise
- * each call would queue its own request and Nuxt's dedupe wouldn't kick in
- * reliably across separate component setups.
+ * exactly once per page (in `pages/index.vue` setup), otherwise each call
+ * would queue its own request and Nuxt's dedupe wouldn't kick in reliably
+ * across separate component setups.
  */
 export function useCalendarSync() {
   const api = createApi()
-  const weekAnchor = useState<Date>(STATE_KEY.WEEK_ANCHOR, () => todayLocal())
-  const selectedType = useState<BookingTypeParam>(STATE_KEY.SELECTED_TYPE, () => DEFAULT_TYPE)
-  const refreshTrigger = useState<number>('cal:refresh-tick', () => 0)
-  const pending = useState<boolean>('cal:pending', () => false)
-  const lastUpdated = useState<Date | null>('cal:last-updated', () => null)
-
+  const { weekAnchor, selectedType, refreshTick, pending, lastUpdated } = calendarState()
   const weekStartIso = computed(() => formatLocalDate(weekAnchor.value))
 
   const result = useAsyncData<CalendarWeek>(
@@ -114,15 +125,8 @@ export function useCalendarSync() {
     },
     {
       default: () => [],
-      watch: [weekStartIso, selectedType, refreshTrigger],
-      // Only reuse the cached value on the very first request (SSR → client
-      // hydration). For watch-triggered refetches (type/week changed), force
-      // a real network call — otherwise the cache short-circuits the request
-      // and the UI stays on the old data.
-      getCachedData: (key, nuxtApp, ctx) => {
-        if (ctx.cause === 'initial') return nuxtApp.payload.data[key]
-        return undefined
-      },
+      watch: [weekStartIso, selectedType, refreshTick],
+      getCachedData: initialOnlyCache,
     },
   )
 

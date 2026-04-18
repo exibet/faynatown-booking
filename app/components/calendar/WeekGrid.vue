@@ -1,8 +1,10 @@
 <script setup lang="ts">
-import type { CalendarSlot, CalendarWeek } from '#shared/types'
+import type { CalendarSlot, CalendarWeek, SlotState } from '#shared/types'
 import { OPERATING_HOURS } from '#shared/constants'
 import type { BookingTypeId, BookingTypeParam } from '#shared/constants'
-import { dayShortName, fmtDayDot, parseLocalDate, sameDay, useToday } from '~/utils/datetime'
+import { parseLocalDate, sameDay } from '#shared/utils/datetime'
+import { dayShortName, fmtDayDot, useToday } from '~/utils/datetime'
+import { computeSlotState } from '~/utils/slot-state'
 
 const props = defineProps<{
   week: CalendarWeek
@@ -16,7 +18,7 @@ const emit = defineEmits<{
   (e: 'slot-click', payload: { cell: CalendarSlot, date: string, anchor: DOMRect }): void
 }>()
 
-const { locale } = useI18n()
+const appLocale = useAppLocale()
 const today = useToday()
 
 // Exclusive end — `OPERATING_HOURS.end = 22` means the day STOPS at 22:00,
@@ -87,11 +89,12 @@ const days = computed<DayColumn[]>(() => {
   })
 })
 
-function slotState(day: DayColumn, slot: CalendarSlot): 'free' | 'busy' | 'past' | 'yours' {
-  if (day.isPast) return 'past'
-  if (props.isSlotYours(day.date, slot.startHour, slot.endHour, props.typeId)) return 'yours'
-  if (!slot.available) return 'busy'
-  return 'free'
+function slotState(day: DayColumn, slot: CalendarSlot): SlotState {
+  return computeSlotState({
+    isPast: day.isPast,
+    isYours: props.isSlotYours(day.date, slot.startHour, slot.endHour, props.typeId),
+    available: slot.available,
+  })
 }
 
 function onSlotClick(day: DayColumn, payload: { cell: CalendarSlot, anchor: DOMRect }) {
@@ -115,7 +118,7 @@ function onSlotClick(day: DayColumn, payload: { cell: CalendarSlot, anchor: DOMR
         :key="day.iso"
         :class="['ft-dayhead', { 'is-today': day.isToday }]"
       >
-        <span class="ft-dayhead-name">{{ dayShortName(day.date, locale === 'uk' ? 'uk' : 'en') }}</span>
+        <span class="ft-dayhead-name">{{ dayShortName(day.date, appLocale) }}</span>
         <span class="ft-dayhead-date">{{ fmtDayDot(day.date) }}</span>
       </div>
     </div>

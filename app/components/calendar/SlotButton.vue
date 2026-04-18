@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import type { CalendarSlot } from '#shared/types'
+import type { CalendarSlot, SlotState } from '#shared/types'
 import { fmtTimeHHMM } from '~/utils/datetime'
-
-type SlotState = 'free' | 'busy' | 'past' | 'yours'
 
 const props = defineProps<{
   cell: CalendarSlot

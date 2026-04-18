@@ -8,12 +8,7 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
-function onKey(event: KeyboardEvent) {
-  if (event.key === 'Escape') emit('close')
-}
-
-onMounted(() => window.addEventListener('keydown', onKey))
-onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
+useEscape(() => emit('close'))
 </script>
 
 <template>

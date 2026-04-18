@@ -1,29 +1,23 @@
 <script setup lang="ts">
-import { BOOKING_TYPES, HIDDEN_TYPE_IDS } from '#shared/constants'
+import { BOOKING_TYPES, findBookingType } from '#shared/constants'
 import type { BookingTypeParam } from '#shared/constants'
 import type { CalendarWeek } from '#shared/types'
-import { addDays, fmtMonthDay } from '~/utils/datetime'
+import { addDays } from '#shared/utils/datetime'
+import { fmtMonthDay } from '~/utils/datetime'
 
 defineProps<{
   week: CalendarWeek
 }>()
 
 const { t, locale, setLocale } = useI18n()
+const appLocale = useAppLocale()
 
 const calendar = useCalendar()
 const flat = useFlat()
 const theme = useTheme()
 const auth = useAuth()
 
-const flatOpen = ref(false)
-const typeOpen = ref(false)
-const profileOpen = ref(false)
-
-function closeAll(except?: 'flat' | 'type' | 'profile') {
-  if (except !== 'flat') flatOpen.value = false
-  if (except !== 'type') typeOpen.value = false
-  if (except !== 'profile') profileOpen.value = false
-}
+const dropdowns = useDropdownGroup<'flat' | 'type' | 'profile'>()
 
 const flatOptions = computed(() => flat.flats.value.map(f => ({
   value: f.flatId,
@@ -31,7 +25,7 @@ const flatOptions = computed(() => flat.flats.value.map(f => ({
 })))
 
 const typeOptions = computed(() => BOOKING_TYPES
-  .filter(b => !HIDDEN_TYPE_IDS.includes(b.id))
+  .filter(b => b.visible)
   .map((b) => {
     const unitsLabel = b.unitLabel === 'court' ? t('types.courts') : t('types.zones')
     return {
@@ -41,7 +35,12 @@ const typeOptions = computed(() => BOOKING_TYPES
     }
   }))
 
-const selectedTypeMeta = computed(() => BOOKING_TYPES.find(b => b.param === calendar.selectedType.value))
+const profileOptions = computed(() => [{
+  value: 'logout',
+  label: t('auth.logout'),
+}])
+
+const selectedTypeMeta = computed(() => findBookingType(calendar.selectedType.value))
 const selectedTypeLabel = computed(() => selectedTypeMeta.value
   ? t(`types.${selectedTypeMeta.value.i18nKey}`)
   : '')
@@ -49,8 +48,7 @@ const selectedTypeLabel = computed(() => selectedTypeMeta.value
 const range = computed(() => {
   const start = calendar.weekAnchor.value
   const end = addDays(start, 6)
-  const lc = locale.value === 'uk' ? 'uk' : 'en'
-  return `${fmtMonthDay(start, lc)} — ${fmtMonthDay(end, lc)}`
+  return `${fmtMonthDay(start, appLocale.value)} — ${fmtMonthDay(end, appLocale.value)}`
 })
 
 // "Updated X min ago" — refreshed once a minute via a tick ref so the label
@@ -75,16 +73,19 @@ const updatedLabel = computed(() => {
   return t('calendar.updatedAgo', { minutes })
 })
 
-function onFlatSelect(value: string | number) {
-  if (typeof value !== 'string') return
+function onFlatSelect(value: string) {
   flat.select(value)
-  closeAll()
+  dropdowns.closeAll()
 }
 
-function onTypeSelect(value: string | number) {
-  if (typeof value !== 'string') return
-  calendar.setType(value as BookingTypeParam)
-  closeAll()
+function onTypeSelect(value: BookingTypeParam) {
+  calendar.setType(value)
+  dropdowns.closeAll()
+}
+
+function onProfileSelect(value: string) {
+  dropdowns.closeAll()
+  if (value === 'logout') auth.logout()
 }
 
 function toggleLocale() {
@@ -93,28 +94,13 @@ function toggleLocale() {
 
 function toggleFlat() {
   if (!flat.hasMultiple.value) return
-  closeAll('flat')
-  flatOpen.value = !flatOpen.value
-}
-
-function toggleType() {
-  closeAll('type')
-  typeOpen.value = !typeOpen.value
-}
-
-function toggleProfile() {
-  closeAll('profile')
-  profileOpen.value = !profileOpen.value
+  dropdowns.toggle('flat')
 }
 
 // Icon shows the theme the user will get on click — i.e. the opposite of
 // the current resolved theme. System default applies until the user picks
 // once; from then on we honour the explicit choice.
 const themeIcon = computed(() => theme.resolved.value === 'dark' ? 'sun' : 'moon')
-
-function onThemeClick() {
-  theme.toggle()
-}
 </script>
 
 <template>
@@ -135,17 +121,17 @@ function onThemeClick() {
           :size="12"
         />
         <Dropdown
-          :open="flatOpen"
+          :open="dropdowns.is('flat')"
           :options="flatOptions"
           :selected-value="flat.selectedFlat.value.flatId"
           @select="onFlatSelect"
-          @close="flatOpen = false"
+          @close="dropdowns.closeAll"
         />
       </div>
 
       <div
         class="ft-pill"
-        @click="toggleType"
+        @click="dropdowns.toggle('type')"
       >
         <span class="ft-pill-label">{{ t('header.type') }}</span>
         <span class="ft-pill-value">{{ selectedTypeLabel }}</span>
@@ -155,11 +141,11 @@ function onThemeClick() {
           :size="12"
         />
         <Dropdown
-          :open="typeOpen"
+          :open="dropdowns.is('type')"
           :options="typeOptions"
           :selected-value="calendar.selectedType.value"
           @select="onTypeSelect"
-          @close="typeOpen = false"
+          @close="dropdowns.closeAll"
         />
       </div>
     </div>
@@ -219,35 +205,26 @@ function onThemeClick() {
         type="button"
         class="ft-icon-btn"
         :aria-label="t('theme.toggle')"
-        @click="onThemeClick"
+        @click="theme.toggle"
       >
         <Icon :name="themeIcon" />
       </button>
-      <div
-        style="position: relative;"
-      >
+      <div style="position: relative;">
         <button
           type="button"
           class="ft-icon-btn"
           :aria-label="t('common.profile')"
-          @click="toggleProfile"
+          @click="dropdowns.toggle('profile')"
         >
           <Icon name="user" />
         </button>
-        <div
-          v-if="profileOpen"
-          class="ft-menu"
+        <Dropdown
+          :open="dropdowns.is('profile')"
+          :options="profileOptions"
           style="right: 0; left: auto;"
-          @click="profileOpen = false"
-        >
-          <button
-            type="button"
-            class="ft-menu-item"
-            @click="auth.logout"
-          >
-            {{ t('auth.logout') }}
-          </button>
-        </div>
+          @select="onProfileSelect"
+          @close="dropdowns.closeAll"
+        />
       </div>
     </div>
   </header>

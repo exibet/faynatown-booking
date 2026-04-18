@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import type { CalendarSlot, ZoneItem } from '#shared/types'
-import { BOOKING_TYPES } from '#shared/constants'
-import type { BookingTypeId, BookingTypeParam } from '#shared/constants'
-import { fmtMonthDay, fmtTimeHHMM, parseLocalDate } from '~/utils/datetime'
-import { groupZones } from '~/utils/zone-grouping'
+import type { CalendarSlot } from '#shared/types'
+import type { BookingTypeParam } from '#shared/constants'
+import { parseLocalDate } from '#shared/utils/datetime'
+import { fmtMonthDay, fmtTimeHHMM } from '~/utils/datetime'
 
 const props = defineProps<{
   cell: CalendarSlot
@@ -16,29 +15,33 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
-const { t, locale } = useI18n()
-const zones = useZones()
-const bookings = useBookings()
+const { t } = useI18n()
+const appLocale = useAppLocale()
 
-const meta = computed(() => BOOKING_TYPES.find(b => b.param === props.type))
+const {
+  loading,
+  fetchError,
+  items,
+  meta,
+  unitLabel,
+  headerLabel,
+  availableCount,
+  groups,
+  isYours,
+  load,
+} = useZonesForSlot({
+  cell: computed<CalendarSlot | null>(() => props.cell),
+  date: computed<string | null>(() => props.date),
+  type: toRef(props, 'type'),
+})
+
 const typeName = computed(() => meta.value ? t(`types.${meta.value.i18nKey}`) : '')
-// BBQ tiles label as "BBQ" instead of the generic "Зона" — the API returns
-// "Бесідка N" but in this product the user thinks in BBQ units.
-const unitLabel = computed(() => {
-  if (props.type === 'BBQ') return 'BBQ'
-  return meta.value?.unitLabel === 'court' ? t('zones.court') : t('zones.zone')
-})
-const headerLabel = computed(() => {
-  if (props.type === 'BBQ') return t('zones.chooseGazebo')
-  return meta.value?.unitLabel === 'court' ? t('zones.chooseCourt') : t('zones.chooseZone')
-})
 
 const dateLabel = computed(() => {
   const d = parseLocalDate(props.date)
-  const lc = locale.value === 'uk' ? 'uk' : 'en'
   const start = fmtTimeHHMM(props.cell.startHour * 60)
   const end = fmtTimeHHMM(props.cell.endHour * 60)
-  return `${fmtMonthDay(d, lc)} · ${start}–${end}`
+  return `${fmtMonthDay(d, appLocale.value)} · ${start}–${end}`
 })
 
 // Position: anchor right, flip left if it overflows. Vertical clamp 16px.
@@ -58,51 +61,8 @@ const pos = computed(() => {
   return { left, top }
 })
 
-const items = ref<ZoneItem[]>([])
-const loading = ref(false)
-const fetchError = ref(false)
-
-const availableCount = computed(() => items.value.filter(z => z.available).length)
-const groups = computed(() => groupZones(items.value))
-
-const typeId = computed<BookingTypeId>(() => meta.value?.id ?? 6)
-const myKeys = computed(() => bookings.myUnitKeysForSlot(
-  parseLocalDate(props.date),
-  props.cell.startHour,
-  props.cell.endHour,
-  typeId.value,
-))
-
-function isYours(area: number, unit: number): boolean {
-  return myKeys.value.has(`${area}-${unit}`)
-}
-
-async function load() {
-  loading.value = true
-  fetchError.value = false
-  try {
-    items.value = await zones.fetchZones({
-      type: props.type,
-      date: props.date,
-      slot: props.cell.rawLabel,
-    })
-  }
-  catch {
-    fetchError.value = true
-  }
-  finally {
-    loading.value = false
-  }
-}
-
 onMounted(load)
-
-function onKey(e: KeyboardEvent) {
-  if (e.key === 'Escape') emit('close')
-}
-
-onMounted(() => window.addEventListener('keydown', onKey))
-onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
+useEscape(() => emit('close'))
 </script>
 
 <template>

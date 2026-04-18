@@ -5,25 +5,79 @@
  *
  * `unitLabel` controls how UI labels individual zones — courts (Майданчик 1)
  * vs. zones (Бесідка 1). `slotMinutes` is the upstream slot length used for
- * positional grid math (top/height calculations).
+ * positional grid math (top/height calculations). `unitCount` is the number
+ * of physical units (courts/gazebos) per booking type — pulled from the
+ * upstream zones endpoint sample in docs/API.md; approximate for types
+ * we haven't observed (Basketball / Volleyball → assume single court).
+ * `visible` controls whether the type appears in the UI dropdown/sheet:
+ * Tennis (2) physically shares the court with Volleyball (4), so Volleyball
+ * is the canonical filter and Tennis is hidden — users only see one option.
  */
-// `unitCount` — hardcoded number of physical units (courts/gazebos) per
-// booking type. Pulled from the upstream zones endpoint sample in
-// docs/API.md; approximate for types we haven't observed yet (Basketball /
-// Volleyball / Football → assume single court). Update when upstream
-// expands or shrinks the property.
 export const BOOKING_TYPES = [
-  { id: 1, i18nKey: 'BBQ', param: 'BBQ', unitLabel: 'zone', slotMinutes: 240, unitCount: 16 },
-  { id: 2, i18nKey: 'Tennis', param: 'Tennis', unitLabel: 'court', slotMinutes: 60, unitCount: 1 },
-  { id: 3, i18nKey: 'Basketball', param: 'Basketball', unitLabel: 'court', slotMinutes: 60, unitCount: 1 },
-  { id: 4, i18nKey: 'Volleyball', param: 'Volleyball', unitLabel: 'court', slotMinutes: 60, unitCount: 1 },
-  { id: 5, i18nKey: 'Football', param: 'Football', unitLabel: 'court', slotMinutes: 60, unitCount: 2 },
-  { id: 6, i18nKey: 'Paddle_Tennis', param: 'Paddle_Tennis', unitLabel: 'court', slotMinutes: 60, unitCount: 2 },
+  {
+    id: 1,
+    i18nKey: 'BBQ',
+    param: 'BBQ',
+    unitLabel: 'zone',
+    slotMinutes: 240,
+    unitCount: 16,
+    visible: true,
+  },
+  {
+    id: 2,
+    i18nKey: 'Tennis',
+    param: 'Tennis',
+    unitLabel: 'court',
+    slotMinutes: 60,
+    unitCount: 1,
+    visible: false,
+  },
+  {
+    id: 3,
+    i18nKey: 'Basketball',
+    param: 'Basketball',
+    unitLabel: 'court',
+    slotMinutes: 60,
+    unitCount: 1,
+    visible: true,
+  },
+  {
+    id: 4,
+    i18nKey: 'Volleyball',
+    param: 'Volleyball',
+    unitLabel: 'court',
+    slotMinutes: 60,
+    unitCount: 1,
+    visible: true,
+  },
+  {
+    id: 5,
+    i18nKey: 'Football',
+    param: 'Football',
+    unitLabel: 'court',
+    slotMinutes: 60,
+    unitCount: 2,
+    visible: true,
+  },
+  {
+    id: 6,
+    i18nKey: 'Paddle_Tennis',
+    param: 'Paddle_Tennis',
+    unitLabel: 'court',
+    slotMinutes: 60,
+    unitCount: 2,
+    visible: true,
+  },
 ] as const
 
-export type BookingTypeParam = typeof BOOKING_TYPES[number]['param']
-export type BookingTypeId = typeof BOOKING_TYPES[number]['id']
-export type BookingUnitLabel = typeof BOOKING_TYPES[number]['unitLabel']
+export type BookingType = typeof BOOKING_TYPES[number]
+export type BookingTypeParam = BookingType['param']
+export type BookingTypeId = BookingType['id']
+export type BookingUnitLabel = BookingType['unitLabel']
+
+/** Default type when user state is empty — Paddle Tennis (most popular). */
+export const DEFAULT_BOOKING_TYPE: BookingTypeParam = 'Paddle_Tennis'
+const DEFAULT_BOOKING_TYPE_ID: BookingTypeId = 6
 
 // Tuple (not array) so Zod's `z.enum` accepts it without a cast.
 export const BOOKING_TYPE_PARAMS = [
@@ -35,14 +89,14 @@ export const BOOKING_TYPE_PARAMS = [
   'Paddle_Tennis',
 ] as const satisfies readonly BookingTypeParam[]
 
-// Slot duration per booking type, used to render calendar grid.
-export const SLOT_DURATION_HOURS: Record<BookingTypeParam, number> = {
-  BBQ: 4,
-  Tennis: 1,
-  Basketball: 1,
-  Volleyball: 1,
-  Football: 1,
-  Paddle_Tennis: 1,
+/** Look up a booking type by its `param` string. */
+export function findBookingType(param: BookingTypeParam): BookingType | undefined {
+  return BOOKING_TYPES.find(b => b.param === param)
+}
+
+/** Returns the id for a param, falling back to the Paddle Tennis default. */
+export function typeIdOf(param: BookingTypeParam): BookingTypeId {
+  return findBookingType(param)?.id ?? DEFAULT_BOOKING_TYPE_ID
 }
 
 // Operating hours per booking type (inclusive start, exclusive end).
@@ -54,11 +108,6 @@ export const OPERATING_HOURS: Record<BookingTypeParam, { start: number, end: num
   Football: { start: 7, end: 22 },
   Paddle_Tennis: { start: 7, end: 22 },
 }
-
-// Type IDs that the UI dropdown skips. Tennis (2) physically shares the
-// court with Volleyball (4); Volleyball is the canonical filter so users
-// only see one option.
-export const HIDDEN_TYPE_IDS: readonly BookingTypeId[] = [2]
 
 // Mandatory header on every upstream request — without it API returns 400.
 export const FAYNATOWN_API_VERSION = 45
@@ -75,9 +124,3 @@ export const AUTH_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 89
 // Suffixes the API appends to text fields when an item is unavailable.
 // We detect both and strip them when rendering.
 export const UNAVAILABLE_SUFFIXES = ['(недоступно)', '(зайнято)'] as const
-
-// Public link to the official KAN mobile app — popover/sheet CTAs route the
-// user there because /booking/bookZone requires reCAPTCHA bound to the
-// mobile app bundle (web cannot create bookings, see docs/API.md).
-export const KAN_APP_URL_IOS = 'https://apps.apple.com/ua/app/kan-developer/id1525116681'
-export const KAN_APP_URL_ANDROID = 'https://play.google.com/store/apps/details?id=com.kandevelopment.Kan'

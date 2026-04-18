@@ -5,11 +5,10 @@ const props = defineProps<{
   date: Date
 }>()
 
-const { locale } = useI18n()
-const lc = computed(() => locale.value === 'uk' ? 'uk' : 'en')
+const appLocale = useAppLocale()
 
-const title = computed(() => dayTitle(props.date, lc.value))
-const dateStr = computed(() => fmtMonthDay(props.date, lc.value))
+const title = computed(() => dayTitle(props.date, appLocale.value))
+const dateStr = computed(() => fmtMonthDay(props.date, appLocale.value))
 </script>
 
 <template>

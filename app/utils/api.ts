@@ -1,3 +1,5 @@
+import { STATE_KEY } from '#shared/state-keys'
+
 interface ApiErrorShape {
   statusCode?: number
   statusMessage?: string
@@ -23,6 +25,12 @@ function isApiError(value: unknown): value is ApiErrorShape {
  * On 401 from upstream we clear the in-memory `isLoggedIn` state (the
  * server has already deleted the httpOnly cookie inside `$faynatown`) and
  * navigate to /login via the captured Nuxt context.
+ *
+ * Called from each composable's setup — `useI18n()` and `useToast()` require
+ * component setup context, so we can't hoist this into a Nuxt plugin.
+ * `$fetch.create()` is cheap; the cost of one extra factory call per
+ * composable invocation is not worth the complexity of threading the instance
+ * through a plugin that only works on first call.
  */
 export function createApi() {
   const toast = useToast()
@@ -45,7 +53,7 @@ export function createApi() {
       const statusCode = error.statusCode ?? response?.status
 
       if (statusCode === 401) {
-        const isLoggedIn = useState<boolean>('auth:is-logged-in')
+        const isLoggedIn = useState<boolean>(STATE_KEY.IS_LOGGED_IN)
         isLoggedIn.value = false
         toast.error(t('auth.sessionExpired'))
         nuxtApp.runWithContext(() => navigateTo('/login'))

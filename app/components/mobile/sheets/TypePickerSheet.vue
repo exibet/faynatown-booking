@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BOOKING_TYPES, HIDDEN_TYPE_IDS } from '#shared/constants'
+import { BOOKING_TYPES } from '#shared/constants'
 import type { BookingTypeParam } from '#shared/constants'
 
 defineProps<{ open: boolean }>()
@@ -8,9 +8,7 @@ const emit = defineEmits<{ (e: 'close'): void }>()
 const { t } = useI18n()
 const calendar = useCalendar()
 
-const visibleTypes = computed(() =>
-  BOOKING_TYPES.filter(t => !HIDDEN_TYPE_IDS.includes(t.id)),
-)
+const visibleTypes = computed(() => BOOKING_TYPES.filter(b => b.visible))
 
 function pick(type: BookingTypeParam) {
   calendar.setType(type)

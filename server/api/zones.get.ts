@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { BOOKING_TYPE_PARAMS } from '#shared/constants'
 import type { ZoneItem, ZoneResponse } from '#shared/types'
 import { stripUnavailableSuffix } from '~~/server/utils/slot-parser'
-import { toUpstreamBookingDate } from '~~/server/utils/date'
+import { toUpstreamBookingDate } from '#shared/utils/datetime'
 import { getDefaultFlatId } from '~~/server/utils/flats'
 
 const QuerySchema = z.object({

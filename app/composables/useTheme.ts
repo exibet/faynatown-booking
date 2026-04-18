@@ -20,11 +20,13 @@ function resolve(pref: ThemePreference): ResolvedTheme {
 }
 
 /**
- * Theme composable — `data-theme="light"|"dark"` on <html>.
+ * Theme composable — exposes `resolved` (light|dark) plus `set`/`toggle` for
+ * the UI toggle button. `init()` is consumed exclusively by
+ * `plugins/theme.client.ts` at boot; components do not call it.
  *
  * Persistence: localStorage only ('system' is not stored — we just omit the
- * key, so an inline script in the document head can fall back to OS default
- * before hydration without a FOUC.)
+ * key, so the inline script in `<head>` (public/theme-init.js) can fall back
+ * to OS default before hydration without a FOUC.)
  */
 export function useTheme() {
   const preference = useState<ThemePreference>(STATE_KEY.THEME_PREF, () => 'system')
@@ -65,7 +67,7 @@ export function useTheme() {
     resolved.value = next
     applyDom(next)
 
-    // Live-track OS preference while the user is in 'system' mode
+    // Live-track OS preference while the user is in 'system' mode.
     const mq = window.matchMedia('(prefers-color-scheme: light)')
     mq.addEventListener('change', () => {
       if (preference.value !== 'system') return
@@ -76,7 +78,6 @@ export function useTheme() {
   }
 
   return {
-    preference: readonly(preference),
     resolved: readonly(resolved),
     set,
     toggle,

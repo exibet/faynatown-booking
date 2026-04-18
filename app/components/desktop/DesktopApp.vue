@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { CalendarSlot } from '#shared/types'
-import { BOOKING_TYPES } from '#shared/constants'
-import type { BookingTypeId } from '#shared/constants'
+import { typeIdOf } from '#shared/constants'
 import { STATE_KEY } from '#shared/state-keys'
 
 interface PopoverPayload {
@@ -16,11 +15,7 @@ const calendar = useCalendar()
 const bookings = useBookings()
 
 const popover = useState<PopoverPayload | null>(STATE_KEY.POPOVER, () => null)
-
-const currentTypeId = computed<BookingTypeId>(() => {
-  const meta = BOOKING_TYPES.find(b => b.param === calendar.selectedType.value)
-  return meta?.id ?? 6
-})
+const currentTypeId = computed(() => typeIdOf(calendar.selectedType.value))
 
 function onSlotClick(payload: PopoverPayload) {
   popover.value = payload
@@ -30,7 +25,8 @@ function closePopover() {
   popover.value = null
 }
 
-// Keyboard nav (desktop)
+// Keyboard nav (desktop) — Escape handled globally, arrows / h / l / t only
+// trigger when focus isn't in a text field.
 function onKey(event: KeyboardEvent) {
   const target = event.target
   if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) return
@@ -46,14 +42,13 @@ function onKey(event: KeyboardEvent) {
     case 't':
       calendar.goToToday()
       break
-    case 'Escape':
-      closePopover()
-      break
   }
 }
 
 onMounted(() => window.addEventListener('keydown', onKey))
 onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
+
+useEscape(closePopover)
 </script>
 
 <template>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { BookingItem } from '#shared/types'
-import { fmtMonthDay, fmtTimeHHMM, parseLocalDateTime } from '~/utils/datetime'
+import { fmtBookingWhen } from '~/utils/datetime'
 
 const props = defineProps<{
   booking: BookingItem
@@ -11,17 +11,10 @@ const emit = defineEmits<{
   (e: 'cancel', id: number): void
 }>()
 
-const { t, locale } = useI18n()
+const { t } = useI18n()
+const appLocale = useAppLocale()
 
-const when = computed(() => {
-  const start = parseLocalDateTime(props.booking.start)
-  const end = parseLocalDateTime(props.booking.end)
-  const dateStr = fmtMonthDay(start, locale.value === 'uk' ? 'uk' : 'en')
-  const startMin = start.getHours() * 60 + start.getMinutes()
-  const endMin = end.getHours() * 60 + end.getMinutes()
-  return `${dateStr} · ${fmtTimeHHMM(startMin)}–${fmtTimeHHMM(endMin)}`
-})
-
+const when = computed(() => fmtBookingWhen(props.booking, appLocale.value))
 const showCancel = computed(() => props.variant === 'upcoming' && props.booking.canCancel)
 </script>
 

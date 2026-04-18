@@ -2,8 +2,51 @@ import { API } from '#shared/api'
 import { FETCH_KEY } from '#shared/fetch-keys'
 import type { BookingTypeId } from '#shared/constants'
 import type { BookingItem } from '#shared/types'
-import { parseLocalDateTime, sameDay } from '~/utils/datetime'
+import { parseLocalDateTime, sameDay } from '#shared/utils/datetime'
 import { parseArea, parseUnitNumber } from '~/utils/zone-grouping'
+import { initialOnlyCache } from '~/utils/async-data'
+
+// Local state keys — not surfaced on the public `STATE_KEY` registry because
+// nothing outside this file touches them. Grouping here prevents typos across
+// useBookings() and useBookingsSync() creating a second state cell.
+const K = {
+  PENDING: 'bookings:pending',
+  REFRESH_TICK: 'bookings:refresh-tick',
+} as const
+
+/**
+ * Converts a booking's end-datetime into an integer hour suitable for
+ * overlap arithmetic against a slot's `[startHour, endHour)` range. `24:00`
+ * sentinel handles bookings that end exactly at midnight (API returns
+ * `T00:00:00` on the next day, which we treat as 24h on the calendar day).
+ */
+function slotEndHourFromDateTime(end: Date): number {
+  if (end.getHours() === 0 && end.getMinutes() === 0) return 24
+  return end.getHours() + (end.getMinutes() > 0 ? 1 : 0)
+}
+
+interface SlotScope {
+  date: Date
+  startHour: number
+  endHour: number
+  typeId: BookingTypeId
+}
+
+/**
+ * Returns bookings that overlap the given (date, hour-range, type).
+ * Shared helper behind `isSlotYours` and `myUnitKeysForSlot` — both needed
+ * the same (typeId + sameDay + hour-overlap) filter.
+ */
+function filterBookingsForSlot(bookings: readonly BookingItem[], scope: SlotScope): BookingItem[] {
+  return bookings.filter((b) => {
+    if (b.typeId !== scope.typeId) return false
+    const start = parseLocalDateTime(b.start)
+    const end = parseLocalDateTime(b.end)
+    if (!sameDay(start, scope.date)) return false
+    const slotEndHour = slotEndHourFromDateTime(end)
+    return start.getHours() < scope.endHour && slotEndHour > scope.startHour
+  })
+}
 
 /**
  * Bookings composable — state + cancel + helpers. Pair with `useBookingsSync`
@@ -18,8 +61,8 @@ export function useBookings() {
   const toast = useToast()
   const { t } = useI18n()
 
-  const pending = useState<boolean>('bookings:pending', () => false)
-  const refreshTick = useState<number>('bookings:refresh-tick', () => 0)
+  const pending = useState<boolean>(K.PENDING, () => false)
+  const refreshTick = useState<number>(K.REFRESH_TICK, () => 0)
 
   const nuxtData = useNuxtData<BookingItem[]>(FETCH_KEY.BOOKINGS)
   const bookings = computed<BookingItem[]>(() => nuxtData.data.value ?? [])
@@ -29,16 +72,7 @@ export function useBookings() {
   const upcomingCount = computed(() => upcoming.value.length)
 
   function isSlotYours(date: Date, startHour: number, endHour: number, typeId: BookingTypeId): boolean {
-    return bookings.value.some((b) => {
-      if (b.typeId !== typeId) return false
-      const start = parseLocalDateTime(b.start)
-      const end = parseLocalDateTime(b.end)
-      if (!sameDay(start, date)) return false
-      const slotEndHour = end.getHours() === 0 && end.getMinutes() === 0
-        ? 24
-        : end.getHours() + (end.getMinutes() > 0 ? 1 : 0)
-      return start.getHours() < endHour && slotEndHour > startHour
-    })
+    return filterBookingsForSlot(bookings.value, { date, startHour, endHour, typeId }).length > 0
   }
 
   /**
@@ -48,18 +82,10 @@ export function useBookings() {
    * `userBookings` and `zones` endpoints.
    */
   function myUnitKeysForSlot(date: Date, startHour: number, endHour: number, typeId: BookingTypeId): Set<string> {
+    const matches = filterBookingsForSlot(bookings.value, { date, startHour, endHour, typeId })
     const keys = new Set<string>()
-    for (const b of bookings.value) {
-      if (b.typeId !== typeId) continue
-      const start = parseLocalDateTime(b.start)
-      const end = parseLocalDateTime(b.end)
-      if (!sameDay(start, date)) continue
-      const slotEndHour = end.getHours() === 0 && end.getMinutes() === 0
-        ? 24
-        : end.getHours() + (end.getMinutes() > 0 ? 1 : 0)
-      if (start.getHours() < endHour && slotEndHour > startHour) {
-        keys.add(`${parseArea(b.zoneName)}-${parseUnitNumber(b.zoneName)}`)
-      }
+    for (const b of matches) {
+      keys.add(`${parseArea(b.zoneName)}-${parseUnitNumber(b.zoneName)}`)
     }
     return keys
   }
@@ -93,8 +119,8 @@ export function useBookings() {
 /** Bookings DATA SYNC — call ONCE per page. */
 export function useBookingsSync() {
   const api = createApi()
-  const refreshTick = useState<number>('bookings:refresh-tick', () => 0)
-  const pending = useState<boolean>('bookings:pending', () => false)
+  const refreshTick = useState<number>(K.REFRESH_TICK, () => 0)
+  const pending = useState<boolean>(K.PENDING, () => false)
 
   const result = useAsyncData<BookingItem[]>(
     FETCH_KEY.BOOKINGS,
@@ -102,10 +128,7 @@ export function useBookingsSync() {
     {
       default: () => [],
       watch: [refreshTick],
-      getCachedData: (key, nuxtApp, ctx) => {
-        if (ctx.cause === 'initial') return nuxtApp.payload.data[key]
-        return undefined
-      },
+      getCachedData: initialOnlyCache,
     },
   )
 
@@ -115,3 +138,7 @@ export function useBookingsSync() {
 
   return result
 }
+
+// Exported for unit testing. Prefer the composable's `isSlotYours` /
+// `myUnitKeysForSlot` in production code.
+export const _internal = { filterBookingsForSlot, slotEndHourFromDateTime }

@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import type { CalendarDay, CalendarSlot } from '#shared/types'
+import type { CalendarDay, CalendarSlot, SlotState } from '#shared/types'
 import type { BookingTypeId } from '#shared/constants'
-import { parseLocalDate, sameDay, useToday } from '~/utils/datetime'
+import { parseLocalDate, sameDay } from '#shared/utils/datetime'
+import { useToday } from '~/utils/datetime'
+import { computeSlotState } from '~/utils/slot-state'
 
 const props = defineProps<{
   day: CalendarDay | null
@@ -31,12 +33,13 @@ const dayMeta = computed<DayMeta | null>(() => {
   }
 })
 
-function slotState(slot: CalendarSlot): 'free' | 'busy' | 'past' | 'yours' {
+function slotState(slot: CalendarSlot): SlotState {
   if (!dayMeta.value) return 'busy'
-  if (dayMeta.value.isPast) return 'past'
-  if (props.isSlotYours(dayMeta.value.date, slot.startHour, slot.endHour, props.typeId)) return 'yours'
-  if (!slot.available) return 'busy'
-  return 'free'
+  return computeSlotState({
+    isPast: dayMeta.value.isPast,
+    isYours: props.isSlotYours(dayMeta.value.date, slot.startHour, slot.endHour, props.typeId),
+    available: slot.available,
+  })
 }
 </script>
 

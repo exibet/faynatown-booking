@@ -6,7 +6,7 @@ import type {
   TimeSlotResponse,
 } from '#shared/types'
 import { parseTimeSlot } from '~~/server/utils/slot-parser'
-import { toUpstreamBookingDate, weekDates } from '~~/server/utils/date'
+import { toUpstreamBookingDate, weekDateStrings } from '#shared/utils/datetime'
 import { getDefaultFlatId } from '~~/server/utils/flats'
 
 const QuerySchema = z.object({
@@ -33,7 +33,7 @@ export default defineEventHandler(async (event): Promise<CalendarWeek> => {
   const { type, weekStart } = parsed.data
 
   const flatId = await getDefaultFlatId(event)
-  const dates = weekDates(weekStart)
+  const dates = weekDateStrings(weekStart)
 
   const daySlots = await Promise.all(
     dates.map(async (date): Promise<CalendarDay> => {

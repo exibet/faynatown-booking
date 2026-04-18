@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BOOKING_TYPES } from '#shared/constants'
+import { findBookingType } from '#shared/constants'
 
 const emit = defineEmits<{
   (e: 'open-type' | 'open-bookings'): void
@@ -10,7 +10,7 @@ const calendar = useCalendar()
 const { upcomingCount } = useBookings()
 
 const typeName = computed(() => {
-  const meta = BOOKING_TYPES.find(b => b.param === calendar.selectedType.value)
+  const meta = findBookingType(calendar.selectedType.value)
   return meta ? t(`types.${meta.i18nKey}`) : ''
 })
 </script>

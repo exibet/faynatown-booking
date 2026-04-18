@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { CalendarWeek } from '#shared/types'
-import { dayShortName, parseLocalDate } from '~/utils/datetime'
+import { parseLocalDate } from '#shared/utils/datetime'
+import { dayShortName } from '~/utils/datetime'
 
 interface DayStat {
   busyPct: number
@@ -11,7 +12,8 @@ const props = defineProps<{
   week: CalendarWeek
 }>()
 
-const { locale, t } = useI18n()
+const { t } = useI18n()
+const appLocale = useAppLocale()
 
 /**
  * Heatmap shows per-day busyness derived from boolean availability counts.
@@ -30,7 +32,7 @@ const stats = computed<DayStat[]>(() => {
     const busyPct = total === 0 ? 0 : 1 - free / total
     return {
       busyPct,
-      label: dayShortName(date, locale.value === 'uk' ? 'uk' : 'en'),
+      label: dayShortName(date, appLocale.value),
     }
   })
 })
