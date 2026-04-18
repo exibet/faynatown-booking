@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import { findBookingType } from '#shared/constants'
-
 const emit = defineEmits<{
   (e: 'open-type' | 'open-bookings'): void
 }>()
@@ -8,11 +6,9 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const calendar = useCalendar()
 const { upcomingCount } = useBookings()
+const bookingTypeLabel = useBookingTypeLabel()
 
-const typeName = computed(() => {
-  const meta = findBookingType(calendar.selectedType.value)
-  return meta ? t(`types.${meta.i18nKey}`) : ''
-})
+const typeName = computed(() => bookingTypeLabel(calendar.selectedType.value))
 </script>
 
 <template>

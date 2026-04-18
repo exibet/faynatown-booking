@@ -393,14 +393,6 @@
   border-radius: 8px;
   margin-top: 6px;
 }
-.sh-confirm-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  margin-top: 12px;
-  box-sizing: border-box;
-}
 
 /* Mobile toast */
 .mob-toast-host {

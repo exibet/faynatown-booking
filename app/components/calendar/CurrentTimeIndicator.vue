@@ -11,19 +11,15 @@ const props = defineProps<{
 // on client). We only render after the client mounts.
 const mounted = ref(false)
 const minutes = ref(0)
-let timer: ReturnType<typeof setInterval> | null = null
 
 onMounted(() => {
   mounted.value = true
   minutes.value = nowMinutes()
-  timer = setInterval(() => {
-    minutes.value = nowMinutes()
-  }, 30_000)
 })
 
-onBeforeUnmount(() => {
-  if (timer) clearInterval(timer)
-})
+useInterval(() => {
+  minutes.value = nowMinutes()
+}, 30_000)
 
 const top = computed(() => (minutes.value - props.startHour * 60) * props.pxPerMin)
 const visible = computed(() => mounted.value && top.value >= 0)

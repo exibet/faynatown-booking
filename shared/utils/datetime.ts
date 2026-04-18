@@ -25,6 +25,11 @@ export function sameDay(a: Date, b: Date): boolean {
     && a.getDate() === b.getDate()
 }
 
+/** True when `date` is strictly before `today` (same-day returns false). */
+export function isPastDay(date: Date, today: Date): boolean {
+  return date < today && !sameDay(date, today)
+}
+
 /** Format a Date as `YYYY-MM-DD` in local time. */
 export function formatLocalDate(date: Date): string {
   const y = date.getFullYear()

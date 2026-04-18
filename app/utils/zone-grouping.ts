@@ -14,8 +14,6 @@ export interface UnitTile {
   id: number
   unit: number
   available: boolean
-  /** Display label with the area suffix removed. */
-  cleanName: string
 }
 
 export interface ZoneGroup {
@@ -36,10 +34,6 @@ export function parseUnitNumber(name: string): number {
   return match?.[1] ? Number.parseInt(match[1], 10) : 0
 }
 
-export function stripArea(name: string): string {
-  return name.replace(AREA_RE, '').trim()
-}
-
 export function groupZones(items: ZoneItem[]): ZoneGroup[] {
   const map = new Map<number, ZoneGroup>()
   for (const item of items) {
@@ -52,7 +46,6 @@ export function groupZones(items: ZoneItem[]): ZoneGroup[] {
       id: item.id,
       unit,
       available: item.available,
-      cleanName: stripArea(item.name),
     })
   }
   for (const g of map.values()) {

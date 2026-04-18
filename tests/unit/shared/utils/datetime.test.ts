@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   addDays,
   formatLocalDate,
+  isPastDay,
   mondayOf,
   parseLocalDate,
   parseLocalDateTime,
@@ -35,6 +36,22 @@ describe('sameDay', () => {
     const b = new Date(2026, 3, 18, 22, 15)
     expect(sameDay(a, b)).toBe(true)
     expect(sameDay(a, addDays(a, 1))).toBe(false)
+  })
+})
+
+describe('isPastDay', () => {
+  const today = new Date(2026, 3, 18)
+
+  it('returns false for today even if time-of-day is different', () => {
+    expect(isPastDay(new Date(2026, 3, 18, 0, 0), today)).toBe(false)
+  })
+
+  it('returns true for yesterday', () => {
+    expect(isPastDay(addDays(today, -1), today)).toBe(true)
+  })
+
+  it('returns false for tomorrow', () => {
+    expect(isPastDay(addDays(today, 1), today)).toBe(false)
   })
 })
 

@@ -4,7 +4,7 @@ import { STATE_KEY } from '#shared/state-keys'
 import { DEFAULT_BOOKING_TYPE } from '#shared/constants'
 import type { BookingTypeParam } from '#shared/constants'
 import type { CalendarWeek } from '#shared/types'
-import { addDays, formatLocalDate, parseLocalDate, todayLocal } from '#shared/utils/datetime'
+import { addDays, formatLocalDate, todayLocal } from '#shared/utils/datetime'
 import { initialOnlyCache } from '~/utils/async-data'
 
 // Private state keys shared between useCalendar() and useCalendarSync().
@@ -73,10 +73,6 @@ export function useCalendar() {
     selectedType.value = type
   }
 
-  function setAnchor(date: Date): void {
-    weekAnchor.value = date
-  }
-
   function refresh(): void {
     refreshTick.value += 1
   }
@@ -89,13 +85,11 @@ export function useCalendar() {
     week,
     pending: readonly(pending),
     lastUpdated: readonly(lastUpdated),
-    refreshTrigger: readonly(refreshTick),
     canPrevWeek,
     prevWeek,
     nextWeek,
     goToToday,
     setType,
-    setAnchor,
     refresh,
   }
 }
@@ -140,9 +134,4 @@ export function useCalendarSync() {
   })
 
   return result
-}
-
-/** Parse a YYYY-MM-DD weekStart-style string into a Date (local). */
-export function parseWeekStart(iso: string): Date {
-  return parseLocalDate(iso)
 }

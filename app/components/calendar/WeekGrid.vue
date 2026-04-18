@@ -1,72 +1,39 @@
 <script setup lang="ts">
-import type { CalendarSlot, CalendarWeek, SlotState } from '#shared/types'
-import { OPERATING_HOURS } from '#shared/constants'
-import type { BookingTypeId, BookingTypeParam } from '#shared/constants'
-import { parseLocalDate, sameDay } from '#shared/utils/datetime'
+import type { CalendarSlot, SlotState } from '#shared/types'
+import { OPERATING_HOURS, typeIdOf } from '#shared/constants'
+import { isPastDay, parseLocalDate, sameDay } from '#shared/utils/datetime'
 import { dayShortName, fmtDayDot, useToday } from '~/utils/datetime'
 import { computeSlotState } from '~/utils/slot-state'
-
-const props = defineProps<{
-  week: CalendarWeek
-  type: BookingTypeParam
-  typeId: BookingTypeId
-  loading: boolean
-  isSlotYours: (date: Date, startHour: number, endHour: number, typeId: BookingTypeId) => boolean
-}>()
 
 const emit = defineEmits<{
   (e: 'slot-click', payload: { cell: CalendarSlot, date: string, anchor: DOMRect }): void
 }>()
 
+const calendar = useCalendar()
+const bookings = useBookings()
 const appLocale = useAppLocale()
 const today = useToday()
+
+const currentType = computed(() => calendar.selectedType.value)
+const currentTypeId = computed(() => typeIdOf(currentType.value))
+const currentWeek = computed(() => calendar.week.value ?? [])
+const loading = computed(() => calendar.pending.value)
 
 // Exclusive end — `OPERATING_HOURS.end = 22` means the day STOPS at 22:00,
 // so the last visible row is 21:00–22:00. Adding 22:00 as its own row would
 // show an empty hour after the last bookable slot.
 const hours = computed(() => {
-  const range = OPERATING_HOURS[props.type]
+  const range = OPERATING_HOURS[currentType.value]
   const result: number[] = []
   for (let h = range.start; h < range.end; h++) result.push(h)
   return result
 })
 
-// Adaptive row height — fits all hours into the visible viewport (no scroll).
-// Falls back to 64px ("normal" density) on SSR where the viewport is
-// unknown; ResizeObserver upscales to roomy as soon as the client measures
-// real available space. The jump is brief and only happens once per mount.
-const MIN_ROW_H = 44
-const FALLBACK_ROW_H = 80
 const body = useTemplateRef<HTMLElement>('body')
-const rowH = ref(FALLBACK_ROW_H)
+const rowH = useAdaptiveRowHeight(body, computed(() => hours.value.length))
 const pxPerMin = computed(() => rowH.value / 60)
 
-function recompute(): void {
-  if (!body.value) return
-  const available = body.value.clientHeight
-  if (available <= 0) return
-  const next = Math.max(MIN_ROW_H, Math.floor(available / hours.value.length))
-  rowH.value = next
-}
-
-let observer: ResizeObserver | null = null
-
-onMounted(() => {
-  // Pre-paint sync: measure once before the browser renders so the cards
-  // start at the correct size. ResizeObserver picks up later changes.
-  recompute()
-  if (!body.value || typeof ResizeObserver === 'undefined') return
-  observer = new ResizeObserver(() => recompute())
-  observer.observe(body.value)
-})
-
-onBeforeUnmount(() => {
-  observer?.disconnect()
-})
-
-watch(hours, () => recompute(), { flush: 'post' })
-
-const startHour = computed(() => OPERATING_HOURS[props.type].start)
+const startHour = computed(() => OPERATING_HOURS[currentType.value].start)
 
 interface DayColumn {
   iso: string
@@ -77,13 +44,13 @@ interface DayColumn {
 }
 
 const days = computed<DayColumn[]>(() => {
-  return props.week.map((day) => {
+  return currentWeek.value.map((day) => {
     const date = parseLocalDate(day.date)
     return {
       iso: day.date,
       date,
       isToday: sameDay(date, today.value),
-      isPast: date < today.value && !sameDay(date, today.value),
+      isPast: isPastDay(date, today.value),
       slots: day.slots,
     }
   })
@@ -92,7 +59,7 @@ const days = computed<DayColumn[]>(() => {
 function slotState(day: DayColumn, slot: CalendarSlot): SlotState {
   return computeSlotState({
     isPast: day.isPast,
-    isYours: props.isSlotYours(day.date, slot.startHour, slot.endHour, props.typeId),
+    isYours: bookings.isSlotYours(day.date, slot.startHour, slot.endHour, currentTypeId.value),
     available: slot.available,
   })
 }
@@ -105,7 +72,7 @@ function onSlotClick(day: DayColumn, payload: { cell: CalendarSlot, anchor: DOMR
 <template>
   <div
     class="ft-cal"
-    :class="{ 'ft-cal-stale': loading && week.length > 0 }"
+    :class="{ 'ft-cal-stale': loading && currentWeek.length > 0 }"
   >
     <div
       v-if="loading"

@@ -1,24 +1,20 @@
 <script setup lang="ts">
 /**
  * Tiny inline SVG icon set. We avoid pulling Lucide/Tabler as a dependency —
- * the design only needs ~10 functional icons and shipping our own keeps the
- * bundle a few hundred KB lighter. All glyphs are 24×24 viewBox, 1.5px stroke
- * for visual weight matching the design (thin-stroke).
+ * the design only needs a handful of functional icons and shipping our own
+ * keeps the bundle a few hundred KB lighter. All glyphs are 24×24 viewBox,
+ * 1.5px stroke to match the design (thin-stroke).
  */
 type IconName
   = | 'chevron-down'
     | 'chevron-left'
     | 'chevron-right'
-    | 'chevron-up'
     | 'close'
     | 'sun'
     | 'moon'
-    | 'monitor'
     | 'user'
     | 'calendar'
-    | 'logout'
     | 'refresh'
-    | 'menu'
 
 defineProps<{
   name: IconName
@@ -44,9 +40,6 @@ defineProps<{
   >
     <template v-if="name === 'chevron-down'">
       <polyline points="6 9 12 15 18 9" />
-    </template>
-    <template v-else-if="name === 'chevron-up'">
-      <polyline points="18 15 12 9 6 15" />
     </template>
     <template v-else-if="name === 'chevron-left'">
       <polyline points="15 18 9 12 15 6" />
@@ -126,27 +119,6 @@ defineProps<{
     <template v-else-if="name === 'moon'">
       <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
     </template>
-    <template v-else-if="name === 'monitor'">
-      <rect
-        x="3"
-        y="4"
-        width="18"
-        height="12"
-        rx="2"
-      />
-      <line
-        x1="8"
-        y1="20"
-        x2="16"
-        y2="20"
-      />
-      <line
-        x1="12"
-        y1="16"
-        x2="12"
-        y2="20"
-      />
-    </template>
     <template v-else-if="name === 'user'">
       <circle
         cx="12"
@@ -182,40 +154,10 @@ defineProps<{
         y2="7"
       />
     </template>
-    <template v-else-if="name === 'logout'">
-      <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-      <polyline points="16 17 21 12 16 7" />
-      <line
-        x1="21"
-        y1="12"
-        x2="9"
-        y2="12"
-      />
-    </template>
     <template v-else-if="name === 'refresh'">
       <polyline points="23 4 23 10 17 10" />
       <polyline points="1 20 1 14 7 14" />
       <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
-    </template>
-    <template v-else-if="name === 'menu'">
-      <line
-        x1="3"
-        y1="6"
-        x2="21"
-        y2="6"
-      />
-      <line
-        x1="3"
-        y1="12"
-        x2="21"
-        y2="12"
-      />
-      <line
-        x1="3"
-        y1="18"
-        x2="21"
-        y2="18"
-      />
     </template>
   </svg>
 </template>

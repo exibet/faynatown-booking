@@ -443,6 +443,7 @@
   margin-bottom: 14px;
 }
 .ft-pop-zone-group + .ft-pop-zone-group { margin-top: 8px; }
+.ft-pop-empty { font-size: 12px; color: var(--ink-3); padding: 8px 0 14px; }
 .ft-pop-zone-label {
   font-size: 10.5px;
   text-transform: uppercase;

@@ -1,15 +1,13 @@
 <script setup lang="ts">
 import type { CalendarDay, CalendarSlot, SlotState } from '#shared/types'
-import type { BookingTypeId } from '#shared/constants'
-import { parseLocalDate, sameDay } from '#shared/utils/datetime'
+import { typeIdOf } from '#shared/constants'
+import { isPastDay, parseLocalDate } from '#shared/utils/datetime'
 import { useToday } from '~/utils/datetime'
 import { computeSlotState } from '~/utils/slot-state'
 
 const props = defineProps<{
   day: CalendarDay | null
   loading: boolean
-  typeId: BookingTypeId
-  isSlotYours: (date: Date, startHour: number, endHour: number, typeId: BookingTypeId) => boolean
 }>()
 
 const emit = defineEmits<{
@@ -17,19 +15,23 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const calendar = useCalendar()
+const bookings = useBookings()
+const today = useToday()
+
+const typeId = computed(() => typeIdOf(calendar.selectedType.value))
 
 interface DayMeta {
   date: Date
   isPast: boolean
 }
 
-const today = useToday()
 const dayMeta = computed<DayMeta | null>(() => {
   if (!props.day) return null
   const date = parseLocalDate(props.day.date)
   return {
     date,
-    isPast: date < today.value && !sameDay(date, today.value),
+    isPast: isPastDay(date, today.value),
   }
 })
 
@@ -37,7 +39,7 @@ function slotState(slot: CalendarSlot): SlotState {
   if (!dayMeta.value) return 'busy'
   return computeSlotState({
     isPast: dayMeta.value.isPast,
-    isYours: props.isSlotYours(dayMeta.value.date, slot.startHour, slot.endHour, props.typeId),
+    isYours: bookings.isSlotYours(dayMeta.value.date, slot.startHour, slot.endHour, typeId.value),
     available: slot.available,
   })
 }

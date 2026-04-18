@@ -103,16 +103,32 @@ export function useBookings() {
     }
   }
 
+  /**
+   * Prompts the user via a styled confirm dialog, then cancels on OK.
+   * Both desktop sidebar and mobile bookings-sheet share this flow.
+   */
+  async function cancelWithConfirm(id: number): Promise<boolean> {
+    const confirm = useConfirm()
+    const ok = await confirm.ask({
+      title: t('bookings.cancelTitle'),
+      confirmLabel: t('bookings.cancelConfirm'),
+      cancelLabel: t('bookings.keep'),
+      variant: 'danger',
+    })
+    if (!ok) return false
+    return cancel(id)
+  }
+
   return {
     bookings,
     upcoming,
     past,
     upcomingCount,
     pending: readonly(pending),
-    refreshTick: readonly(refreshTick),
     isSlotYours,
     myUnitKeysForSlot,
     cancel,
+    cancelWithConfirm,
   }
 }
 

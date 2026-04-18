@@ -17,12 +17,12 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 const appLocale = useAppLocale()
+const bookingTypeLabel = useBookingTypeLabel()
 
 const {
   loading,
   fetchError,
   items,
-  meta,
   unitLabel,
   headerLabel,
   availableCount,
@@ -35,7 +35,7 @@ const {
   type: toRef(props, 'type'),
 })
 
-const typeName = computed(() => meta.value ? t(`types.${meta.value.i18nKey}`) : '')
+const typeName = computed(() => bookingTypeLabel(props.type))
 
 const dateLabel = computed(() => {
   const d = parseLocalDate(props.date)
@@ -60,6 +60,8 @@ const pos = computed(() => {
   if (top < 16) top = 16
   return { left, top }
 })
+
+const hasError = computed(() => fetchError.value || items.value.length === 0)
 
 onMounted(load)
 useEscape(() => emit('close'))
@@ -105,52 +107,16 @@ useEscape(() => emit('close'))
           >{{ availableCount }} {{ t('zones.available') }}</span>
         </div>
 
-        <div
-          v-if="loading"
-          class="ft-pop-units"
-        >
-          <div
-            v-for="n in 6"
-            :key="n"
-            class="ft-skel"
-            style="height: 56px;"
-          />
-        </div>
-
-        <div
-          v-else-if="fetchError || items.length === 0"
-          style="font-size: 12px; color: var(--ink-3); padding: 8px 0 14px;"
-        >
-          {{ t('zones.noZones') }}
-        </div>
-
-        <template v-else>
-          <div
-            v-for="group in groups"
-            :key="group.area"
-            class="ft-pop-zone-group"
-          >
-            <div
-              v-if="groups.length > 1"
-              class="ft-pop-zone-label"
-            >
-              {{ t('zones.zonePrefix') }} {{ group.area }}
-            </div>
-            <div class="ft-pop-units">
-              <div
-                v-for="tile in group.units"
-                :key="tile.id"
-                :class="[
-                  'ft-unit',
-                  isYours(group.area, tile.unit) ? 'is-yours' : (tile.available ? 'is-free' : 'is-busy'),
-                ]"
-              >
-                <span class="ft-unit-num">{{ tile.unit }}</span>
-                <span class="ft-unit-label">{{ unitLabel }}</span>
-              </div>
-            </div>
-          </div>
-        </template>
+        <ZoneUnitsGrid
+          variant="desktop"
+          :loading="loading"
+          :has-error="hasError"
+          :groups="groups"
+          :unit-label="unitLabel"
+          :zone-prefix="t('zones.zonePrefix')"
+          :empty-label="t('zones.noZones')"
+          :is-yours="isYours"
+        />
       </div>
 
       <div class="ft-pop-foot">

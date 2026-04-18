@@ -1,18 +1,6 @@
 <script setup lang="ts">
 const { t } = useI18n()
-const { upcoming, past, upcomingCount, cancel, pending } = useBookings()
-const confirm = useConfirm()
-
-async function onCancel(id: number) {
-  const ok = await confirm.ask({
-    title: t('bookings.cancelTitle'),
-    confirmLabel: t('bookings.cancelConfirm'),
-    cancelLabel: t('bookings.keep'),
-    variant: 'danger',
-  })
-  if (!ok) return
-  await cancel(id)
-}
+const { upcoming, past, upcomingCount, cancelWithConfirm, pending } = useBookings()
 </script>
 
 <template>
@@ -49,7 +37,7 @@ async function onCancel(id: number) {
         :key="b.id"
         :booking="b"
         variant="upcoming"
-        @cancel="onCancel"
+        @cancel="cancelWithConfirm"
       />
     </div>
 

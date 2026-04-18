@@ -40,6 +40,8 @@ const sheetTitle = computed(() => {
   return `${start}–${end} · ${fmtMonthDay(d, appLocale.value)}`
 })
 
+const hasError = computed(() => fetchError.value || items.value.length === 0)
+
 watch(() => [props.open, props.cell?.startHour, props.date], () => {
   if (props.open) load()
 })
@@ -59,52 +61,17 @@ watch(() => [props.open, props.cell?.startHour, props.date], () => {
       >{{ availableCount }} {{ t('zones.available') }}</span>
     </div>
 
-    <div
-      v-if="loading"
-      class="sh-units"
-    >
-      <div
-        v-for="n in 8"
-        :key="n"
-        class="ft-skel"
-        style="height: 60px;"
-      />
-    </div>
-
-    <div
-      v-else-if="fetchError || items.length === 0"
-      class="sh-empty"
-    >
-      {{ t('zones.noZones') }}
-    </div>
-
-    <template v-else>
-      <div
-        v-for="group in groups"
-        :key="group.area"
-        class="sh-zone-group"
-      >
-        <div
-          v-if="groups.length > 1"
-          class="sh-zone-label"
-        >
-          {{ t('zones.zonePrefix') }} {{ group.area }}
-        </div>
-        <div class="sh-units">
-          <div
-            v-for="tile in group.units"
-            :key="tile.id"
-            :class="[
-              'sh-unit',
-              isYours(group.area, tile.unit) ? 'is-yours' : (tile.available ? '' : 'is-busy'),
-            ]"
-          >
-            <span class="sh-unit-num">{{ tile.unit }}</span>
-            <span class="sh-unit-label">{{ unitLabel }}</span>
-          </div>
-        </div>
-      </div>
-    </template>
+    <ZoneUnitsGrid
+      variant="mobile"
+      :loading="loading"
+      :has-error="hasError"
+      :groups="groups"
+      :unit-label="unitLabel"
+      :zone-prefix="t('zones.zonePrefix')"
+      :empty-label="t('zones.noZones')"
+      :is-yours="isYours"
+      :skeleton-count="8"
+    />
 
     <button
       type="button"

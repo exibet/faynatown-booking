@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { CalendarSlot } from '#shared/types'
-import { typeIdOf } from '#shared/constants'
 import { STATE_KEY } from '#shared/state-keys'
 
 interface PopoverPayload {
@@ -12,10 +11,8 @@ interface PopoverPayload {
 // Sync composables are owned by pages/index.vue (called once for both layouts).
 // We just consume the shared state here.
 const calendar = useCalendar()
-const bookings = useBookings()
 
 const popover = useState<PopoverPayload | null>(STATE_KEY.POPOVER, () => null)
-const currentTypeId = computed(() => typeIdOf(calendar.selectedType.value))
 
 function onSlotClick(payload: PopoverPayload) {
   popover.value = payload
@@ -53,16 +50,9 @@ useEscape(closePopover)
 
 <template>
   <div class="ft-app">
-    <AppHeader :week="calendar.week.value ?? []" />
+    <AppHeader />
     <div class="ft-main">
-      <WeekGrid
-        :week="calendar.week.value ?? []"
-        :type="calendar.selectedType.value"
-        :type-id="currentTypeId"
-        :loading="calendar.pending.value"
-        :is-slot-yours="bookings.isSlotYours"
-        @slot-click="onSlotClick"
-      />
+      <WeekGrid @slot-click="onSlotClick" />
       <MyBookingsSidebar />
     </div>
     <BookingPopover

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { sameDay } from '#shared/utils/datetime'
+import { isPastDay } from '#shared/utils/datetime'
 import { dayShortName, useToday } from '~/utils/datetime'
 
 const props = defineProps<{
@@ -32,7 +32,7 @@ const cells = computed<DayCell[]>(() => {
     date: d,
     name: dayShortName(d, appLocale.value),
     num: String(d.getDate()).padStart(2, '0'),
-    isPast: d < today.value && !sameDay(d, today.value),
+    isPast: isPastDay(d, today.value),
     isActive: idx === props.selectedIndex,
   }))
 })

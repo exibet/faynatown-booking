@@ -1,20 +1,16 @@
 <script setup lang="ts">
 import type { CalendarSlot } from '#shared/types'
-import { typeIdOf } from '#shared/constants'
 import { STATE_KEY } from '#shared/state-keys'
 
 type Sheet = 'type' | 'bookings' | 'slot' | null
 
 // Sync composables are owned by pages/index.vue (called once for both layouts).
 const calendar = useCalendar()
-const bookings = useBookings()
 
 const { dayOffset, currentDate, currentDay, canPrevDay, selectDay, nextDay, prevDay } = useMobileDayNav()
 
 const openSheet = useState<Sheet>(STATE_KEY.MOBILE_SHEET, () => null)
 const popSlot = ref<{ cell: CalendarSlot, date: string } | null>(null)
-
-const currentTypeId = computed(() => typeIdOf(calendar.selectedType.value))
 
 function onSlotClick(cell: CalendarSlot) {
   if (!currentDay.value) return
@@ -46,8 +42,6 @@ function closeSheet() {
     <SlotList
       :day="currentDay"
       :loading="calendar.pending.value"
-      :type-id="currentTypeId"
-      :is-slot-yours="bookings.isSlotYours"
       @slot-click="onSlotClick"
     />
 
