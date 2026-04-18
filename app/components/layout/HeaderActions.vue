@@ -17,17 +17,7 @@ const profileOptions = computed(() => [{
   label: t('auth.logout'),
 }])
 
-// "Updated X min ago" — tick lives in useCalendar (single module-level
-// interval shared by all consumers); we localise the label here because
-// useI18n() must run in a component setup, not inside a state composable.
-const updatedLabel = computed(() => {
-  void calendar.updatedTick.value
-  const last = calendar.lastUpdated.value
-  if (!last) return ''
-  const minutes = Math.floor((Date.now() - last.getTime()) / 60_000)
-  if (minutes <= 0) return t('calendar.updatedJustNow')
-  return t('calendar.updatedAgo', { minutes })
-})
+const updatedLabel = useUpdatedAgo(calendar.lastUpdated)
 
 function onProfileSelect(value: string) {
   emit('close')

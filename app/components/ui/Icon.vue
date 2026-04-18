@@ -19,7 +19,6 @@ type IconName
 defineProps<{
   name: IconName
   size?: number
-  ariaLabel?: string
 }>()
 </script>
 
@@ -34,9 +33,7 @@ defineProps<{
     stroke-width="1.5"
     stroke-linecap="round"
     stroke-linejoin="round"
-    :aria-hidden="ariaLabel ? undefined : true"
-    :aria-label="ariaLabel"
-    :role="ariaLabel ? 'img' : undefined"
+    aria-hidden="true"
   >
     <template v-if="name === 'chevron-down'">
       <polyline points="6 9 12 15 18 9" />

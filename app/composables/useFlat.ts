@@ -32,7 +32,6 @@ export function useFlat() {
 
   return {
     flats,
-    selectedFlatId,
     selectedFlat,
     hasMultiple,
     select,

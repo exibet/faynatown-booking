@@ -88,7 +88,6 @@ export function useZonesForSlot({ cell, date, type }: Args) {
   return {
     items,
     loading,
-    fetchError,
     meta,
     unitLabel,
     headerLabel,

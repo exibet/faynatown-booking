@@ -13,10 +13,6 @@ export function useDropdownGroup<K extends string>() {
     return current.value === name
   }
 
-  function openOnly(name: K): void {
-    current.value = name
-  }
-
   function toggle(name: K): void {
     current.value = current.value === name ? null : name
   }
@@ -25,5 +21,5 @@ export function useDropdownGroup<K extends string>() {
     current.value = null
   }
 
-  return { current, is, openOnly, toggle, closeAll }
+  return { current, is, toggle, closeAll }
 }

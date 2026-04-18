@@ -16,7 +16,7 @@ const today = useToday()
 
 const currentType = computed(() => calendar.selectedType.value)
 const currentTypeId = computed(() => typeIdOf(currentType.value))
-const currentWeek = computed(() => calendar.week.value ?? [])
+const currentWeek = computed(() => calendar.week.value)
 const loading = computed(() => calendar.pending.value)
 
 // Exclusive end — `OPERATING_HOURS.end = 22` means the day STOPS at 22:00,

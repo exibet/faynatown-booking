@@ -77,7 +77,6 @@ export type BookingUnitLabel = BookingType['unitLabel']
 
 /** Default type when user state is empty — Paddle Tennis (most popular). */
 export const DEFAULT_BOOKING_TYPE: BookingTypeParam = 'Paddle_Tennis'
-const DEFAULT_BOOKING_TYPE_ID: BookingTypeId = 6
 
 // Tuple (not array) so Zod's `z.enum` accepts it without a cast.
 export const BOOKING_TYPE_PARAMS = [
@@ -94,9 +93,16 @@ export function findBookingType(param: BookingTypeParam): BookingType | undefine
   return BOOKING_TYPES.find(b => b.param === param)
 }
 
-/** Returns the id for a param, falling back to the Paddle Tennis default. */
+/**
+ * Returns the id for a booking-type param. `BookingTypeParam` is the exact
+ * union of `BOOKING_TYPES[n].param` literals, so the lookup is guaranteed at
+ * compile time — the runtime throw is a defensive guard for callers that
+ * smuggle an unknown string past the types (e.g. from upstream JSON).
+ */
 export function typeIdOf(param: BookingTypeParam): BookingTypeId {
-  return findBookingType(param)?.id ?? DEFAULT_BOOKING_TYPE_ID
+  const found = findBookingType(param)
+  if (!found) throw new Error(`Unknown booking type: ${param}`)
+  return found.id
 }
 
 // Operating hours per booking type (inclusive start, exclusive end).

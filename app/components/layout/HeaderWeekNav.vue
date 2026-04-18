@@ -40,6 +40,6 @@ const range = computed(() => {
       <Icon name="chevron-right" />
     </button>
     <span class="ft-range">{{ range }}</span>
-    <OccupancyBar :week="calendar.week.value ?? []" />
+    <OccupancyBar :week="calendar.week.value" />
   </div>
 </template>
