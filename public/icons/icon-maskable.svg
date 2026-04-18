@@ -1,0 +1,5 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Faynatown Booking">
+  <rect width="512" height="512" fill="#1FA56A"/>
+  <rect x="168" y="198" width="192" height="44" rx="10" fill="#FFFFFF"/>
+  <rect x="168" y="282" width="136" height="44" rx="10" fill="#FFFFFF"/>
+</svg>
