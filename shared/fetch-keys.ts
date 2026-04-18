@@ -1,7 +1,6 @@
 export const FETCH_KEY = {
   CALENDAR: 'calendar',
   BOOKINGS: 'bookings',
-  ZONES: 'zones',
   FLATS: 'flats',
 } as const
 

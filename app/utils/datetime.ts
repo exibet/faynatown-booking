@@ -65,15 +65,20 @@ export function dayShortName(date: Date, locale: Locale): string {
   return names[date.getDay()] ?? ''
 }
 
-function dayLongName(date: Date, locale: Locale): string {
+export function dayLongName(date: Date, locale: Locale): string {
   const names = locale === 'uk' ? DAY_NAMES_LONG_UK : DAY_NAMES_LONG_EN
   return names[date.getDay()] ?? ''
 }
 
-export function dayTitle(date: Date, locale: Locale, today: Date = todayLocal()): string {
-  if (sameDay(date, today)) return locale === 'uk' ? 'Сьогодні' : 'Today'
-  if (sameDay(date, addDays(today, 1))) return locale === 'uk' ? 'Завтра' : 'Tomorrow'
-  return dayLongName(date, locale)
+/**
+ * Returns the date's relation to `today` so callers can render a localised
+ * label via `$t('calendar.today'|'calendar.tomorrow')`. `null` → no relation,
+ * caller falls back to `dayLongName`.
+ */
+export function dayRelation(date: Date, today: Date = todayLocal()): 'today' | 'tomorrow' | null {
+  if (sameDay(date, today)) return 'today'
+  if (sameDay(date, addDays(today, 1))) return 'tomorrow'
+  return null
 }
 
 /** Current local time as minutes-from-midnight (for the "now" indicator). */

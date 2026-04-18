@@ -19,10 +19,8 @@ function mapBooking(b: BookingResponse): BookingItem {
   return {
     id: b.id,
     zoneName: b.zoneName,
-    complexName: b.complexName,
     start: b.bookingStart,
     end: b.bookingEnd,
-    details: b.bookingDetails,
     typeId: b.type,
     isActive: !!b.isActive,
     canCancel: !!b.allowDelete && !b.notAllowDelete,

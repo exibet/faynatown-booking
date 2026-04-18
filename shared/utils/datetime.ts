@@ -55,15 +55,6 @@ export function parseLocalDateTime(iso: string): Date {
   return new Date(y, mo - 1, d, h, mi, s)
 }
 
-/** Returns the Monday of the ISO week containing `date` (local time). */
-export function mondayOf(date: Date): Date {
-  const d = new Date(date.getFullYear(), date.getMonth(), date.getDate())
-  const weekday = d.getDay()
-  const daysFromMonday = weekday === 0 ? 6 : weekday - 1
-  d.setDate(d.getDate() - daysFromMonday)
-  return d
-}
-
 /** Returns 7 consecutive `YYYY-MM-DD` strings starting from `weekStart`. */
 export function weekDateStrings(weekStart: string): string[] {
   const start = parseLocalDate(weekStart)
@@ -72,13 +63,4 @@ export function weekDateStrings(weekStart: string): string[] {
     result.push(formatLocalDate(addDays(start, i)))
   }
   return result
-}
-
-/**
- * Converts a `YYYY-MM-DD` date into the upstream API's `bookingDate` format:
- * `2026-04-20T00:00:00Z`. The timezone marker is ignored upstream — our
- * internal dates stay local.
- */
-export function toUpstreamBookingDate(isoDate: string): string {
-  return `${isoDate}T00:00:00Z`
 }

@@ -2,6 +2,7 @@ import type { CalendarSlot, ZoneItem } from '#shared/types'
 import type { BookingTypeParam } from '#shared/constants'
 import { findBookingType, typeIdOf } from '#shared/constants'
 import { parseLocalDate } from '#shared/utils/datetime'
+import { pluralUk } from '~/utils/plural'
 import { groupZones } from '~/utils/zone-grouping'
 
 interface Args {
@@ -38,7 +39,18 @@ export function useZonesForSlot({ cell, date, type }: Args) {
   })
 
   const availableCount = computed(() => items.value.filter(z => z.available).length)
+  const availableLabel = computed(() => {
+    const n = availableCount.value
+    const form = pluralUk(
+      n,
+      t('zones.availableOne'),
+      t('zones.availableFew'),
+      t('zones.availableMany'),
+    )
+    return `${n} ${form}`
+  })
   const groups = computed(() => groupZones(items.value))
+  const hasError = computed(() => fetchError.value || items.value.length === 0)
 
   const myKeys = computed(() => {
     if (!cell.value || !date.value) return new Set<string>()
@@ -81,7 +93,9 @@ export function useZonesForSlot({ cell, date, type }: Args) {
     unitLabel,
     headerLabel,
     availableCount,
+    availableLabel,
     groups,
+    hasError,
     isYours,
     load,
   }

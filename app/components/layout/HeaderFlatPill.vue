@@ -29,8 +29,7 @@ function onClick() {
 <template>
   <div
     v-if="flat.selectedFlat.value"
-    class="ft-pill ft-pill-flat"
-    :style="!flat.hasMultiple.value ? { cursor: 'default' } : undefined"
+    :class="['ft-pill', 'ft-pill-flat', { 'is-static': !flat.hasMultiple.value }]"
     @click="onClick"
   >
     <span class="ft-pill-label">{{ t('header.flat') }}</span>

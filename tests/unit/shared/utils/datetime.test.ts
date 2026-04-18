@@ -3,12 +3,10 @@ import {
   addDays,
   formatLocalDate,
   isPastDay,
-  mondayOf,
   parseLocalDate,
   parseLocalDateTime,
   sameDay,
   todayLocal,
-  toUpstreamBookingDate,
   weekDateStrings,
 } from '#shared/utils/datetime'
 
@@ -103,26 +101,6 @@ describe('parseLocalDateTime', () => {
   })
 })
 
-describe('mondayOf', () => {
-  it('returns same date when given a Monday', () => {
-    // 2026-04-20 is a Monday
-    const monday = mondayOf(new Date(2026, 3, 20))
-    expect(formatLocalDate(monday)).toBe('2026-04-20')
-  })
-
-  it('returns previous Monday when given a Wednesday', () => {
-    // 2026-04-22 is a Wednesday
-    const monday = mondayOf(new Date(2026, 3, 22))
-    expect(formatLocalDate(monday)).toBe('2026-04-20')
-  })
-
-  it('returns previous Monday when given a Sunday', () => {
-    // 2026-04-26 is a Sunday
-    const monday = mondayOf(new Date(2026, 3, 26))
-    expect(formatLocalDate(monday)).toBe('2026-04-20')
-  })
-})
-
 describe('weekDateStrings', () => {
   it('returns 7 consecutive dates starting from weekStart', () => {
     const dates = weekDateStrings('2026-04-20')
@@ -140,11 +118,5 @@ describe('weekDateStrings', () => {
   it('handles month boundaries', () => {
     const dates = weekDateStrings('2026-04-27')
     expect(dates[6]).toBe('2026-05-03')
-  })
-})
-
-describe('toUpstreamBookingDate', () => {
-  it('appends T00:00:00Z as upstream expects', () => {
-    expect(toUpstreamBookingDate('2026-04-17')).toBe('2026-04-17T00:00:00Z')
   })
 })

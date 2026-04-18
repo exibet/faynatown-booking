@@ -22,30 +22,14 @@ function closePopover() {
   popover.value = null
 }
 
-// Keyboard nav (desktop) — Escape handled globally, arrows / h / l / t only
-// trigger when focus isn't in a text field.
-function onKey(event: KeyboardEvent) {
-  const target = event.target
-  if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement) return
-  switch (event.key) {
-    case 'ArrowLeft':
-    case 'h':
-      calendar.prevWeek()
-      break
-    case 'ArrowRight':
-    case 'l':
-      calendar.nextWeek()
-      break
-    case 't':
-      calendar.goToToday()
-      break
-  }
-}
-
-onMounted(() => window.addEventListener('keydown', onKey))
-onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
-
 useEscape(closePopover)
+useKeyboardNav({
+  ArrowLeft: calendar.prevWeek,
+  h: calendar.prevWeek,
+  ArrowRight: calendar.nextWeek,
+  l: calendar.nextWeek,
+  t: calendar.goToToday,
+})
 </script>
 
 <template>

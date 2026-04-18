@@ -36,10 +36,6 @@
 .ft-header-center { display: flex; align-items: center; gap: 8px; min-width: 0; flex-shrink: 1; }
 .ft-header-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 
-.ft-brand { display: flex; align-items: center; gap: 6px; font-weight: 600; letter-spacing: -0.01em; }
-.ft-brand-text { font-size: 13.5px; color: var(--ink); }
-.ft-sep { width: 1px; height: 18px; background: var(--line); margin: 0 4px; }
-
 .ft-pill {
   position: relative;
   display: inline-flex; align-items: center; gap: 8px;
@@ -52,6 +48,8 @@
   transition: background .15s, border-color .15s;
 }
 .ft-pill:hover { background: var(--bg-3); }
+.ft-pill.is-static { cursor: default; }
+.ft-pill.is-static:hover { background: var(--bg-2); }
 .ft-pill-label { color: var(--ink-3); font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; }
 .ft-pill-value { color: var(--ink); font-weight: 500; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ft-pill-chev { color: var(--ink-3); width: 12px; height: 12px; }
@@ -153,10 +151,6 @@
   background-size: 200% 100%;
   animation: ftProgress 1.4s linear infinite;
   z-index: 5;
-}
-@keyframes ftProgress {
-  from { background-position: 200% 0; }
-  to { background-position: -200% 0; }
 }
 .ft-cal-stale { opacity: 0.6; pointer-events: none; transition: opacity .2s; }
 
@@ -379,17 +373,7 @@
 }
 .ft-bk-cancel:hover { background: oklch(0.38 0.12 25 / 0.25); }
 
-/* Skeleton (loading) */
-.ft-skel {
-  background: linear-gradient(90deg, var(--bg) 0%, var(--bg-3) 50%, var(--bg) 100%);
-  background-size: 200% 100%;
-  animation: ftShimmer 1.4s linear infinite;
-  border-radius: var(--radius);
-}
-@keyframes ftShimmer {
-  from { background-position: 200% 0; }
-  to { background-position: -200% 0; }
-}
+/* Skeleton primitive `.ft-skel` + `@keyframes ftShimmer` live in base.css. */
 
 /* Popover */
 .ft-pop-backdrop {
@@ -477,12 +461,6 @@
   background: var(--bg);
   border-top: 1px solid var(--line);
 }
-.ft-pop-hint {
-  flex: 1;
-  font-size: 11.5px;
-  color: var(--ink-3);
-  align-self: center;
-}
 .ft-btn-ghost {
   padding: 7px 12px;
   border-radius: var(--radius);
@@ -556,14 +534,7 @@
   animation: ftToastIn .3s ease both;
 }
 .ft-toast.is-error { border-left-color: var(--danger); }
-.ft-toast.is-leaving { animation: ftToastOut .3s ease both; }
-@keyframes ftToastIn {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-@keyframes ftToastOut {
-  to { opacity: 0; transform: translateY(10px); }
-}
+/* `@keyframes ftToastIn` lives in base.css. */
 
 /* Login (desktop + mobile share) */
 .login-root {

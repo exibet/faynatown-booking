@@ -18,12 +18,11 @@ const appLocale = useAppLocale()
 
 const {
   loading,
-  fetchError,
-  items,
   unitLabel,
   headerLabel,
-  availableCount,
+  availableLabel,
   groups,
+  hasError,
   isYours,
   load,
 } = useZonesForSlot({
@@ -39,8 +38,6 @@ const sheetTitle = computed(() => {
   const end = fmtTimeHHMM(props.cell.endHour * 60)
   return `${start}–${end} · ${fmtMonthDay(d, appLocale.value)}`
 })
-
-const hasError = computed(() => fetchError.value || items.value.length === 0)
 
 watch(() => [props.open, props.cell?.startHour, props.date], () => {
   if (props.open) load()
@@ -58,7 +55,7 @@ watch(() => [props.open, props.cell?.startHour, props.date], () => {
       <span
         v-if="!loading"
         class="sh-section-meta"
-      >{{ availableCount }} {{ t('zones.available') }}</span>
+      >{{ availableLabel }}</span>
     </div>
 
     <ZoneUnitsGrid

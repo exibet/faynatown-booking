@@ -10,7 +10,7 @@ import type { ZoneItem } from '#shared/types'
  * returns one group per area sorted by area number.
  */
 
-export interface UnitTile {
+interface UnitTile {
   id: number
   unit: number
   available: boolean

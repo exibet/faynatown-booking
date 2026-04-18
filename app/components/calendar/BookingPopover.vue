@@ -21,17 +21,16 @@ const bookingTypeLabel = useBookingTypeLabel()
 
 const {
   loading,
-  fetchError,
-  items,
   unitLabel,
   headerLabel,
-  availableCount,
+  availableLabel,
   groups,
+  hasError,
   isYours,
   load,
 } = useZonesForSlot({
-  cell: computed<CalendarSlot | null>(() => props.cell),
-  date: computed<string | null>(() => props.date),
+  cell: toRef(props, 'cell'),
+  date: toRef(props, 'date'),
   type: toRef(props, 'type'),
 })
 
@@ -60,8 +59,6 @@ const pos = computed(() => {
   if (top < 16) top = 16
   return { left, top }
 })
-
-const hasError = computed(() => fetchError.value || items.value.length === 0)
 
 onMounted(load)
 useEscape(() => emit('close'))
@@ -104,7 +101,7 @@ useEscape(() => emit('close'))
           <span
             v-if="!loading"
             class="ft-pop-meta"
-          >{{ availableCount }} {{ t('zones.available') }}</span>
+          >{{ availableLabel }}</span>
         </div>
 
         <ZoneUnitsGrid

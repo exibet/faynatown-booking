@@ -21,7 +21,6 @@ export function useZones() {
 
   const cache = useState<Record<string, ZoneItem[]>>('zones-cache', () => ({}))
   const inFlight = ref<string | null>(null)
-  const error = ref<unknown>(null)
 
   function key(q: ZonesQuery): string {
     return `${q.type}|${q.date}|${q.slot}`
@@ -33,17 +32,12 @@ export function useZones() {
     if (cached) return cached
 
     inFlight.value = k
-    error.value = null
     try {
       const zones = await api<ZoneItem[]>(API.ZONES, {
         query: { type: q.type, date: q.date, slot: q.slot },
       })
       cache.value = { ...cache.value, [k]: zones }
       return zones
-    }
-    catch (e) {
-      error.value = e
-      throw e
     }
     finally {
       inFlight.value = null
@@ -57,6 +51,5 @@ export function useZones() {
   return {
     fetchZones,
     isLoading,
-    error: readonly(error),
   }
 }

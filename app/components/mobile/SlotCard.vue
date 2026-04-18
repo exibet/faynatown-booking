@@ -12,21 +12,12 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+const stateLabel = useSlotStateLabel()
 
 const isInteractive = computed(() => props.state === 'free' || props.state === 'yours')
-
 const startStr = computed(() => fmtTimeHHMM(props.cell.startHour * 60))
 const endStr = computed(() => fmtTimeHHMM(props.cell.endHour * 60))
-
-const label = computed(() => {
-  switch (props.state) {
-    case 'free': return t('calendar.available')
-    case 'busy': return t('calendar.allOccupied')
-    case 'yours': return t('calendar.mine')
-    case 'past': return t('calendar.unavailable')
-  }
-  return ''
-})
+const label = computed(() => stateLabel(props.state, 'mobile'))
 
 const cta = computed(() => {
   if (props.state === 'free') return t('app.choose')

@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import { addDays } from '#shared/utils/datetime'
 import {
+  dayLongName,
+  dayRelation,
   dayShortName,
-  dayTitle,
   fmtDayDot,
   fmtMonthDay,
   fmtTimeHHMM,
@@ -33,12 +34,17 @@ describe('utils/datetime (UI)', () => {
     expect(dayShortName(sat, 'en')).toBe('Sat')
   })
 
-  it('dayTitle uses "today/tomorrow" labels relative to anchor', () => {
+  it('dayLongName returns localized weekday name', () => {
+    const tue = new Date(2026, 3, 21) // Tuesday
+    expect(dayLongName(tue, 'uk')).toBe('Вівторок')
+    expect(dayLongName(tue, 'en')).toBe('Tuesday')
+  })
+
+  it('dayRelation detects today / tomorrow / other', () => {
     const today = new Date(2026, 3, 18)
-    expect(dayTitle(today, 'uk', today)).toBe('Сьогодні')
-    expect(dayTitle(addDays(today, 1), 'uk', today)).toBe('Завтра')
-    expect(dayTitle(addDays(today, 1), 'en', today)).toBe('Tomorrow')
-    // For other days falls back to weekday name
-    expect(dayTitle(addDays(today, 3), 'uk', today)).toBe('Вівторок')
+    expect(dayRelation(today, today)).toBe('today')
+    expect(dayRelation(addDays(today, 1), today)).toBe('tomorrow')
+    expect(dayRelation(addDays(today, 3), today)).toBe(null)
+    expect(dayRelation(addDays(today, -1), today)).toBe(null)
   })
 })

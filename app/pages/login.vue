@@ -6,7 +6,7 @@ const toast = useToast()
 
 definePageMeta({ layout: false })
 
-useHead({ title: () => t('app.title') })
+// Title comes from `app.vue`'s `titleTemplate` fallback — no per-page `useHead`.
 
 const phoneNumber = ref('')
 const password = ref('')

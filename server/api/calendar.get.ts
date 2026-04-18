@@ -6,7 +6,8 @@ import type {
   TimeSlotResponse,
 } from '#shared/types'
 import { parseTimeSlot } from '~~/server/utils/slot-parser'
-import { toUpstreamBookingDate, weekDateStrings } from '#shared/utils/datetime'
+import { toUpstreamBookingDate } from '~~/server/utils/upstream'
+import { weekDateStrings } from '#shared/utils/datetime'
 import { getDefaultFlatId } from '~~/server/utils/flats'
 
 const QuerySchema = z.object({

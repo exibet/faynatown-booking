@@ -4,23 +4,31 @@ import { STATE_KEY } from '#shared/state-keys'
 
 type Sheet = 'type' | 'bookings' | 'slot' | null
 
+interface SlotSelection {
+  cell: CalendarSlot
+  date: string
+}
+
 // Sync composables are owned by pages/index.vue (called once for both layouts).
 const calendar = useCalendar()
 
 const { dayOffset, currentDate, currentDay, canPrevDay, selectDay, nextDay, prevDay } = useMobileDayNav()
 
 const openSheet = useState<Sheet>(STATE_KEY.MOBILE_SHEET, () => null)
-const popSlot = ref<{ cell: CalendarSlot, date: string } | null>(null)
+// Same useState pattern as desktop popover (STATE_KEY.POPOVER) — one shape per
+// layout because the payloads differ (desktop needs a DOMRect anchor), but
+// both use the shared-state registry so any other composable can observe.
+const slotSelection = useState<SlotSelection | null>(STATE_KEY.SLOT_SELECTION, () => null)
 
 function onSlotClick(cell: CalendarSlot) {
   if (!currentDay.value) return
-  popSlot.value = { cell, date: currentDay.value.date }
+  slotSelection.value = { cell, date: currentDay.value.date }
   openSheet.value = 'slot'
 }
 
 function closeSheet() {
   openSheet.value = null
-  if (popSlot.value) popSlot.value = null
+  slotSelection.value = null
 }
 </script>
 
@@ -55,8 +63,8 @@ function closeSheet() {
     />
     <SlotInfoSheet
       :open="openSheet === 'slot'"
-      :cell="popSlot?.cell ?? null"
-      :date="popSlot?.date ?? null"
+      :cell="slotSelection?.cell ?? null"
+      :date="slotSelection?.date ?? null"
       :type="calendar.selectedType.value"
       @close="closeSheet"
     />

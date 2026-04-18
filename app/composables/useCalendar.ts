@@ -16,6 +16,7 @@ const K = {
   PENDING: 'cal:pending',
   LAST_UPDATED: 'cal:last-updated',
   REFRESH_TICK: 'cal:refresh-tick',
+  UPDATED_TICK: 'cal:updated-tick',
 } as const
 
 function calendarState() {
@@ -24,7 +25,22 @@ function calendarState() {
   const pending = useState<boolean>(K.PENDING, () => false)
   const lastUpdated = useState<Date | null>(K.LAST_UPDATED, () => null)
   const refreshTick = useState<number>(K.REFRESH_TICK, () => 0)
-  return { weekAnchor, selectedType, pending, lastUpdated, refreshTick }
+  const updatedTick = useState<number>(K.UPDATED_TICK, () => 0)
+  return { weekAnchor, selectedType, pending, lastUpdated, refreshTick, updatedTick }
+}
+
+// Module-level guard: ensure the "minutes ago" ticker runs exactly once on the
+// client, even though useCalendar() is called from many components. Each call
+// still sees the same reactive `updatedTick` state.
+let updatedTickStarted = false
+
+function ensureUpdatedTicker(updatedTick: Ref<number>): void {
+  if (typeof window === 'undefined') return
+  if (updatedTickStarted) return
+  updatedTickStarted = true
+  setInterval(() => {
+    updatedTick.value += 1
+  }, 60_000)
 }
 
 /**
@@ -37,9 +53,15 @@ function calendarState() {
  * SSR-fetched values are visible synchronously during the SSR render —
  * a `useState` mirror copied through `watchEffect` would only land after
  * setup, causing hydration mismatches between SSR and client.
+ *
+ * `updatedTick` is exposed so a consumer in a real component setup context
+ * (HeaderActions) can localise the "updated X min ago" label via `useI18n()`
+ * — calling `useI18n()` here would break when the composable is invoked from
+ * composables tested outside a full component setup.
  */
 export function useCalendar() {
-  const { weekAnchor, selectedType, pending, lastUpdated, refreshTick } = calendarState()
+  const { weekAnchor, selectedType, pending, lastUpdated, refreshTick, updatedTick }
+    = calendarState()
 
   const nuxtData = useNuxtData<CalendarWeek>(FETCH_KEY.CALENDAR)
   const week = computed<CalendarWeek>(() => nuxtData.data.value ?? [])
@@ -55,6 +77,8 @@ export function useCalendar() {
   const canPrevWeek = computed(() => {
     return addDays(weekAnchor.value, -7).getTime() >= todayLocal().getTime()
   })
+
+  ensureUpdatedTicker(updatedTick)
 
   function prevWeek(): void {
     if (!canPrevWeek.value) return
@@ -85,6 +109,7 @@ export function useCalendar() {
     week,
     pending: readonly(pending),
     lastUpdated: readonly(lastUpdated),
+    updatedTick: readonly(updatedTick),
     canPrevWeek,
     prevWeek,
     nextWeek,

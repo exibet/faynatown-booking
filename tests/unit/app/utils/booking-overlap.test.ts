@@ -1,17 +1,16 @@
 import { describe, expect, it } from 'vitest'
 import type { BookingItem } from '#shared/types'
-import { _internal } from '~/composables/useBookings'
-
-const { filterBookingsForSlot, slotEndHourFromDateTime } = _internal
+import {
+  filterBookingsForSlot,
+  slotEndHourFromDateTime,
+} from '~/utils/booking-overlap'
 
 function mkBooking(overrides: Partial<BookingItem> = {}): BookingItem {
   return {
     id: 1,
     zoneName: 'Майданчик 1 – Падл корт 1',
-    complexName: 'Файна Таун',
     start: '2026-04-20T09:00:00',
     end: '2026-04-20T10:00:00',
-    details: 'з 09:00 по 10:00',
     typeId: 6,
     isActive: true,
     canCancel: true,
@@ -91,6 +90,19 @@ describe('filterBookingsForSlot', () => {
   it('non-overlap: booking ends exactly at slot start', () => {
     const bookings = [
       mkBooking({ id: 1, start: '2026-04-20T08:00:00', end: '2026-04-20T09:00:00' }),
+    ]
+    const matches = filterBookingsForSlot(bookings, {
+      date,
+      startHour: 9,
+      endHour: 10,
+      typeId: 6,
+    })
+    expect(matches).toHaveLength(0)
+  })
+
+  it('non-overlap: booking starts exactly at slot end', () => {
+    const bookings = [
+      mkBooking({ id: 1, start: '2026-04-20T10:00:00', end: '2026-04-20T11:00:00' }),
     ]
     const matches = filterBookingsForSlot(bookings, {
       date,

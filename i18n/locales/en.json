@@ -1,9 +1,6 @@
 {
   "app": {
     "title": "Faynatown — Booking",
-    "kanCtaTitle": "Book in the KAN app",
-    "kanCtaBody": "The web shows availability. Creating a booking is reCAPTCHA-protected and only works in the mobile app.",
-    "openInApp": "Open",
     "choose": "Choose"
   },
   "auth": {
@@ -33,7 +30,6 @@
     "updatedAgo": "Updated {minutes} min ago",
     "updatedJustNow": "Just updated",
     "refresh": "Refresh",
-    "loading": "Loading calendar…",
     "occupancy": "Load",
     "noSlots": "No slots today"
   },
@@ -43,30 +39,25 @@
     "chooseGazebo": "Choose gazebo",
     "court": "Court",
     "zone": "Zone",
-    "available": "available",
-    "occupied": "occupied",
+    "availableOne": "available",
+    "availableFew": "available",
+    "availableMany": "available",
     "noZones": "No courts available",
-    "loading": "Loading courts…",
     "zonePrefix": "Zone"
   },
   "bookings": {
     "title": "My bookings",
     "upcoming": "Upcoming",
     "past": "Past",
-    "active": "Active",
     "cancel": "Cancel",
     "cancelTitle": "Cancel this booking?",
     "cancelConfirm": "Cancel",
     "keep": "Keep",
     "cancelled": "Booking cancelled",
     "cancelFailed": "Cancel failed. Try again.",
-    "noBookings": "No active bookings",
-    "loading": "Loading bookings…"
+    "noBookings": "No active bookings"
   },
   "theme": {
-    "light": "Light",
-    "dark": "Dark",
-    "system": "System",
     "toggle": "Toggle theme"
   },
   "lang": {
@@ -84,9 +75,7 @@
   },
   "errors": {
     "network": "Check your Internet connection",
-    "generic": "Something went wrong",
-    "unauthorized": "Authentication required",
-    "versionRequired": "A new version is available — reload the page"
+    "generic": "Something went wrong"
   },
   "common": {
     "close": "Close",

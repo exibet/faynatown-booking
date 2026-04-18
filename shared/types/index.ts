@@ -14,19 +14,6 @@ export interface Flat {
   isAvaliable?: boolean
 }
 
-export interface BookingTypeResponse {
-  id: number
-  description: string
-  validationMessage: string
-}
-
-export interface DateSlotResponse {
-  id?: number
-  date: string
-  dateValidated: string
-  isAvaliable?: boolean
-}
-
 export interface TimeSlotResponse {
   slotValidated: string
   isAvaliable?: boolean
@@ -93,10 +80,8 @@ export interface ZoneItem {
 export interface BookingItem {
   id: number
   zoneName: string
-  complexName: string
   start: string
   end: string
-  details: string
   typeId: number
   isActive: boolean
   canCancel: boolean

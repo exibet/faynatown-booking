@@ -54,10 +54,8 @@ describe('GET /api/bookings', () => {
     expect(result[0]).toEqual({
       id: 44794,
       zoneName: 'Падл корт 2',
-      complexName: 'Файна Таун',
       start: '2026-04-28T16:00:00',
       end: '2026-04-28T17:00:00',
-      details: 'з 16:00 по 17:00',
       typeId: 6,
       isActive: true,
       canCancel: true,

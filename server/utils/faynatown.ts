@@ -86,7 +86,10 @@ export async function $faynatown<T>(
   }
 
   if (options.asText) return response.text()
-  return response.json() as Promise<T>
+  // Trust boundary: upstream JSON is not validated at runtime (no Zod here).
+  // The generic T is asserted by the caller (server route owns the contract).
+  const data: unknown = await response.json()
+  return data as T
 }
 
 function safeParseJson(text: string): string | Record<string, unknown> {

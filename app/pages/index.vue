@@ -1,12 +1,10 @@
 <script setup lang="ts">
-const { t } = useI18n()
-
 definePageMeta({
   middleware: ['auth'],
   layout: false,
 })
 
-useHead({ title: () => t('app.title') })
+// Title comes from `app.vue`'s `titleTemplate` fallback — no per-page `useHead`.
 
 // Sync composables run ONCE here, not inside DesktopApp / MobileApp — both
 // layouts render simultaneously (CSS hides the inactive one), so registering

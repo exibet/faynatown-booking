@@ -2,7 +2,7 @@ import { API } from '#shared/api'
 import { FETCH_KEY } from '#shared/fetch-keys'
 import type { BookingTypeId } from '#shared/constants'
 import type { BookingItem } from '#shared/types'
-import { parseLocalDateTime, sameDay } from '#shared/utils/datetime'
+import { filterBookingsForSlot } from '~/utils/booking-overlap'
 import { parseArea, parseUnitNumber } from '~/utils/zone-grouping'
 import { initialOnlyCache } from '~/utils/async-data'
 
@@ -13,40 +13,6 @@ const K = {
   PENDING: 'bookings:pending',
   REFRESH_TICK: 'bookings:refresh-tick',
 } as const
-
-/**
- * Converts a booking's end-datetime into an integer hour suitable for
- * overlap arithmetic against a slot's `[startHour, endHour)` range. `24:00`
- * sentinel handles bookings that end exactly at midnight (API returns
- * `T00:00:00` on the next day, which we treat as 24h on the calendar day).
- */
-function slotEndHourFromDateTime(end: Date): number {
-  if (end.getHours() === 0 && end.getMinutes() === 0) return 24
-  return end.getHours() + (end.getMinutes() > 0 ? 1 : 0)
-}
-
-interface SlotScope {
-  date: Date
-  startHour: number
-  endHour: number
-  typeId: BookingTypeId
-}
-
-/**
- * Returns bookings that overlap the given (date, hour-range, type).
- * Shared helper behind `isSlotYours` and `myUnitKeysForSlot` — both needed
- * the same (typeId + sameDay + hour-overlap) filter.
- */
-function filterBookingsForSlot(bookings: readonly BookingItem[], scope: SlotScope): BookingItem[] {
-  return bookings.filter((b) => {
-    if (b.typeId !== scope.typeId) return false
-    const start = parseLocalDateTime(b.start)
-    const end = parseLocalDateTime(b.end)
-    if (!sameDay(start, scope.date)) return false
-    const slotEndHour = slotEndHourFromDateTime(end)
-    return start.getHours() < scope.endHour && slotEndHour > scope.startHour
-  })
-}
 
 /**
  * Bookings composable — state + cancel + helpers. Pair with `useBookingsSync`
@@ -154,7 +120,3 @@ export function useBookingsSync() {
 
   return result
 }
-
-// Exported for unit testing. Prefer the composable's `isSlotYours` /
-// `myUnitKeysForSlot` in production code.
-export const _internal = { filterBookingsForSlot, slotEndHourFromDateTime }

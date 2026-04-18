@@ -11,6 +11,7 @@ export const STATE_KEY = {
   SELECTED_TYPE: 'cal:type',
   SELECTED_FLAT: 'cal:flat',
   POPOVER: 'cal:popover',
+  SLOT_SELECTION: 'cal:slot-selection',
   CONFIRM_DIALOG: 'ui:confirm-dialog',
   MOBILE_DAY_OFFSET: 'mob:day-offset',
   MOBILE_SHEET: 'mob:sheet',
