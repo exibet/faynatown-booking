@@ -1,0 +1,65 @@
+/* ------------------------------------------------------------
+   Faynatown Booking — design tokens (OKLCH)
+   Copy of design_handoff/design_reference/styles.css token block.
+   Theme switched via [data-theme="light"|"dark"] on <html>.
+------------------------------------------------------------ */
+
+:root {
+  --accent: oklch(0.62 0.13 155);
+  /* Softer free-slot tint for dark theme — lower chroma + slightly darker
+     base reads less aggressive on a black calendar. */
+  --accent-weak: oklch(0.30 0.05 155);
+  --accent-ink: oklch(0.92 0.04 155);
+
+  --bg: oklch(0.14 0.005 240);
+  --bg-2: oklch(0.17 0.006 240);
+  --bg-3: oklch(0.21 0.008 240);
+
+  --ink: oklch(0.95 0.005 240);
+  --ink-2: oklch(0.78 0.008 240);
+  --ink-3: oklch(0.58 0.008 240);
+  --ink-4: oklch(0.40 0.006 240);
+
+  --line: oklch(0.26 0.006 240);
+  --line-2: oklch(0.22 0.006 240);
+
+  /* Softer busy fill — much closer to body bg so taken slots recede.
+     UI keeps `opacity: 0.5` on .is-busy so the text stays low-contrast too. */
+  --busy: oklch(0.22 0.004 240);
+  --busy-ink: oklch(0.62 0.005 240);
+
+  --yours: oklch(0.55 0.14 250);
+  --yours-weak: oklch(0.30 0.09 250);
+  --yours-ink: oklch(0.95 0.04 250);
+
+  --danger: oklch(0.68 0.17 25);
+  --danger-weak: oklch(0.38 0.12 25);
+
+  --now: oklch(0.70 0.22 25);
+
+  --radius: 6px;
+  --radius-lg: 10px;
+
+  --row-h: 64px;
+
+  --font-ui: "Inter Tight", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-num: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+[data-theme="light"] {
+  --bg: oklch(0.985 0.003 240);
+  --bg-2: oklch(0.965 0.004 240);
+  --bg-3: oklch(0.935 0.005 240);
+  --ink: oklch(0.22 0.008 240);
+  --ink-2: oklch(0.40 0.008 240);
+  --ink-3: oklch(0.55 0.008 240);
+  --ink-4: oklch(0.72 0.006 240);
+  --line: oklch(0.88 0.005 240);
+  --line-2: oklch(0.92 0.004 240);
+  --busy: oklch(0.88 0.005 240);
+  --busy-ink: oklch(0.55 0.006 240);
+  --accent-weak: oklch(0.90 0.06 155);
+  --accent-ink: oklch(0.30 0.13 155);
+  --yours: oklch(0.58 0.14 250);
+  --yours-weak: oklch(0.88 0.06 250);
+}

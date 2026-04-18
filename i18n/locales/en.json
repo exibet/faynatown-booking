@@ -1,6 +1,10 @@
 {
   "app": {
-    "title": "Faynatown — Booking"
+    "title": "Faynatown — Booking",
+    "kanCtaTitle": "Book in the KAN app",
+    "kanCtaBody": "The web shows availability. Creating a booking is reCAPTCHA-protected and only works in the mobile app.",
+    "openInApp": "Open",
+    "choose": "Choose"
   },
   "auth": {
     "phone": "Phone number",
@@ -11,52 +15,81 @@
     "loginError": "Invalid phone number or password",
     "sessionExpired": "Session expired, sign in again"
   },
+  "header": {
+    "flat": "Flat",
+    "type": "Type"
+  },
   "calendar": {
     "today": "Today",
+    "tomorrow": "Tomorrow",
     "prev": "Previous week",
     "next": "Next week",
+    "prevDay": "Previous day",
+    "nextDay": "Next day",
     "available": "Free",
     "unavailable": "Busy",
-    "mine": "Mine",
-    "allOccupied": "Everything is booked this week",
+    "mine": "Yours",
+    "allOccupied": "All booked",
     "updatedAgo": "Updated {minutes} min ago",
     "updatedJustNow": "Just updated",
     "refresh": "Refresh",
-    "loading": "Loading calendar…"
+    "loading": "Loading calendar…",
+    "occupancy": "Load",
+    "noSlots": "No slots today"
   },
   "zones": {
-    "title": "Available courts",
+    "chooseCourt": "Choose court",
+    "chooseZone": "Choose zone",
+    "chooseGazebo": "Choose gazebo",
+    "court": "Court",
+    "zone": "Zone",
+    "available": "available",
     "occupied": "occupied",
     "noZones": "No courts available",
-    "loading": "Loading courts…"
+    "loading": "Loading courts…",
+    "zonePrefix": "Zone"
   },
   "bookings": {
     "title": "My bookings",
-    "active": "Active",
+    "upcoming": "Upcoming",
     "past": "Past",
+    "active": "Active",
     "cancel": "Cancel",
-    "cancelConfirm": "Cancel this booking?",
+    "cancelTitle": "Cancel this booking?",
+    "cancelConfirm": "Cancel",
+    "keep": "Keep",
     "cancelled": "Booking cancelled",
+    "cancelFailed": "Cancel failed. Try again.",
     "noBookings": "No active bookings",
     "loading": "Loading bookings…"
   },
   "theme": {
     "light": "Light",
     "dark": "Dark",
-    "system": "System"
+    "system": "System",
+    "toggle": "Toggle theme"
+  },
+  "lang": {
+    "toggle": "Toggle language"
   },
   "types": {
     "BBQ": "Gazebos (BBQ)",
     "Tennis": "Tennis",
     "Basketball": "Basketball",
-    "Volleyball": "Volleyball",
+    "Volleyball": "Volleyball / Tennis",
     "Football": "Football",
-    "Paddle_Tennis": "Padel"
+    "Paddle_Tennis": "Padel",
+    "courts": "courts",
+    "zones": "zones"
   },
   "errors": {
     "network": "Check your Internet connection",
     "generic": "Something went wrong",
     "unauthorized": "Authentication required",
     "versionRequired": "A new version is available — reload the page"
+  },
+  "common": {
+    "close": "Close",
+    "profile": "Profile"
   }
 }

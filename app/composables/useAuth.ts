@@ -4,10 +4,11 @@ import { STATE_KEY } from '#shared/state-keys'
 
 export function useAuth() {
   const cookie = useCookie<string | null>(AUTH_COOKIE_NAME)
-  // Initialise from the cookie so SSR renders the authenticated UI when the
-  // user already has a valid session. `useState` shares the value between
-  // server and client, so hydration stays consistent.
-  const isLoggedIn = useState<boolean>(STATE_KEY.IS_LOGGED_IN, () => !!cookie.value)
+  // Default false — the cookie is httpOnly and may be present-but-stale.
+  // The auth middleware promotes this to true after verifying the cookie
+  // exists on SSR; explicit `login()` also sets it. This avoids login.vue
+  // bouncing the user to / based on a dead cookie (would loop with /api 401).
+  const isLoggedIn = useState<boolean>(STATE_KEY.IS_LOGGED_IN, () => false)
 
   async function login(phoneNumber: string, password: string) {
     await $fetch(API.AUTH_LOGIN, {
