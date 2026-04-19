@@ -12,6 +12,7 @@ definePageMeta({
 useCalendarSync()
 useBookingsSync()
 useFlatSync()
+useWeatherSync()
 
 // Both layouts render and CSS hides the inactive one — no flicker on mobile
 // (UA detection is unreliable through devtools emulation; viewport-based

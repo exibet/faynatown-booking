@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import type { CalendarSlot, SlotState } from '#shared/types'
+import type { CalendarSlot, SlotState, WeatherDay } from '#shared/types'
 import { OPERATING_HOURS, typeIdOf } from '#shared/constants'
 import { isPastDay, parseLocalDate, sameDay } from '#shared/utils/datetime'
+import { describeWeatherCode } from '#shared/utils/weather'
 import { dayShortName, fmtDayDot, useToday } from '~/utils/datetime'
 import { computeSlotState } from '~/utils/slot-state'
 
@@ -11,8 +12,10 @@ const emit = defineEmits<{
 
 const calendar = useCalendar()
 const bookings = useBookings()
+const weather = useWeather()
 const appLocale = useAppLocale()
 const today = useToday()
+const { t } = useI18n()
 
 const currentType = computed(() => calendar.selectedType.value)
 const currentTypeId = computed(() => typeIdOf(currentType.value))
@@ -35,23 +38,46 @@ const pxPerMin = computed(() => rowH.value / 60)
 
 const startHour = computed(() => OPERATING_HOURS[currentType.value].start)
 
+interface DayWeatherView {
+  iconName: ReturnType<typeof describeWeatherCode>['icon']
+  tempMin: number
+  tempMax: number
+  title: string
+}
+
 interface DayColumn {
   iso: string
   date: Date
   isToday: boolean
   isPast: boolean
   slots: CalendarSlot[]
+  weather: DayWeatherView | null
+}
+
+function buildWeatherView(day: WeatherDay): DayWeatherView {
+  const descriptor = describeWeatherCode(day.code)
+  const label = t(`weather.${descriptor.i18nKey}`)
+  const range = t('weather.tempRange', { min: day.tempMinC, max: day.tempMaxC })
+  return {
+    iconName: descriptor.icon,
+    tempMin: day.tempMinC,
+    tempMax: day.tempMaxC,
+    title: `${label} · ${range}`,
+  }
 }
 
 const days = computed<DayColumn[]>(() => {
   return currentWeek.value.map((day) => {
     const date = parseLocalDate(day.date)
+    const past = isPastDay(date, today.value)
+    const wx = past ? undefined : weather.forDate(day.date)
     return {
       iso: day.date,
       date,
       isToday: sameDay(date, today.value),
-      isPast: isPastDay(date, today.value),
+      isPast: past,
       slots: day.slots,
+      weather: wx ? buildWeatherView(wx) : null,
     }
   })
 })
@@ -85,8 +111,21 @@ function onSlotClick(day: DayColumn, payload: { cell: CalendarSlot, anchor: DOMR
         :key="day.iso"
         :class="['ft-dayhead', { 'is-today': day.isToday }]"
       >
-        <span class="ft-dayhead-name">{{ dayShortName(day.date, appLocale) }}</span>
-        <span class="ft-dayhead-date">{{ fmtDayDot(day.date) }}</span>
+        <div class="ft-dayhead-main">
+          <span class="ft-dayhead-name">{{ dayShortName(day.date, appLocale) }}</span>
+          <span class="ft-dayhead-date">{{ fmtDayDot(day.date) }}</span>
+        </div>
+        <span
+          v-if="day.weather"
+          class="ft-dayhead-weather"
+          :title="day.weather.title"
+        >
+          <Icon :name="day.weather.iconName" />
+          <span class="ft-dayhead-temp">
+            <span class="ft-dayhead-temp-min">{{ day.weather.tempMin }}°</span>
+            <span class="ft-dayhead-temp-max">{{ day.weather.tempMax }}°</span>
+          </span>
+        </span>
       </div>
     </div>
 
