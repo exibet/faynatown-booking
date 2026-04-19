@@ -35,14 +35,12 @@ async function handleSubmit() {
   loading.value = true
   try {
     await login(phoneNumber.value, password.value)
-    // Hard reload (not navigateTo) — the auth cookie is httpOnly so a SPA
-    // navigation can't see it on the client. A full page load lets the
-    // server-side render with the cookie attached, populating useAsyncData
-    // for calendar/bookings/flats from the start.
-    if (typeof window !== 'undefined') {
-      window.location.assign(redirectTo.value)
-      return
-    }
+    // SPA navigation — `useAuth.login()` now stores the JWT in
+    // `useState(STATE_KEY.TOKEN)` and the auth middleware / `createApi`
+    // both read from it, so we don't need a hard reload to let SSR see the
+    // cookie. A hard reload here would actively BREAK iOS Safari: ITP can
+    // drop our cookie between the login POST response and the next top-level
+    // navigation on *.vercel.app, sending the user back to /login.
     await navigateTo(redirectTo.value)
   }
   catch {

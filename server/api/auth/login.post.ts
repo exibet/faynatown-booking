@@ -48,5 +48,10 @@ export default defineEventHandler(async (event) => {
     maxAge: AUTH_COOKIE_MAX_AGE_SECONDS,
   })
 
-  return { ok: true }
+  // Also return the JWT in the response body so the client can mirror it in
+  // `useState(STATE_KEY.TOKEN)` and attach `Authorization: Bearer` on every
+  // request. Necessary because iOS Safari/ITP on *.vercel.app silently drops
+  // our cookie between SSR and the first client-side XHR (see commit message
+  // of this change / auth middleware comment for the full story).
+  return { ok: true, token }
 })
