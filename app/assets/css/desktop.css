@@ -418,6 +418,9 @@
   z-index: 50;
   overflow: hidden;
   animation: ftPopIn .18s cubic-bezier(.2,.8,.2,1);
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100dvh - 32px);
 }
 @keyframes ftPopIn {
   from { opacity: 0; transform: translateY(4px) scale(0.98); }
@@ -428,6 +431,7 @@
   padding: 14px 16px 10px;
   border-bottom: 1px solid var(--line);
   gap: 12px;
+  flex-shrink: 0;
 }
 .ft-pop-type { font-size: 13px; font-weight: 600; color: var(--accent); }
 .ft-pop-time { font-size: 12px; color: var(--ink-2); margin-top: 3px; font-variant-numeric: tabular-nums; }
@@ -438,7 +442,12 @@
 }
 .ft-pop-close:hover { color: var(--ink); }
 .ft-pop-close svg { width: 18px; height: 18px; }
-.ft-pop-body { padding: 14px 16px; }
+.ft-pop-body {
+  padding: 14px 16px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
 .ft-pop-label {
   display: flex; align-items: baseline; justify-content: space-between;
   font-size: 11.5px;
@@ -472,10 +481,25 @@
   position: relative;
   color: var(--ink);
   font-family: inherit;
+  transition: border-color .15s, background-color .15s, color .15s, transform .08s;
 }
 .ft-unit-num { font-family: var(--font-num); font-size: 16px; font-weight: 500; }
 .ft-unit-label { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.06em; }
-.ft-unit.is-busy { opacity: 0.35; }
+.ft-unit.is-free { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+@media (hover: hover) and (pointer: fine) {
+  .ft-unit.is-free:hover {
+    border-color: var(--accent);
+    background: var(--bg-3);
+  }
+}
+.ft-unit.is-free:active { transform: scale(0.98); }
+.ft-unit.is-picked {
+  border-color: var(--accent);
+  background: var(--accent-weak);
+  color: var(--accent-ink);
+}
+.ft-unit.is-picked .ft-unit-label { color: inherit; opacity: 0.85; }
+.ft-unit.is-busy { opacity: 0.35; cursor: not-allowed; }
 .ft-unit.is-yours {
   background: var(--yours-weak);
   border-color: var(--yours);
@@ -483,11 +507,14 @@
   box-shadow: inset 3px 0 0 var(--yours);
 }
 .ft-unit.is-yours .ft-unit-label { color: inherit; opacity: 0.85; }
+
+/* Captcha notice styles are shared primitives — see `.ft-notice*` in base.css. */
 .ft-pop-foot {
   display: flex; gap: 8px; justify-content: flex-end;
   padding: 12px 16px;
   background: var(--bg);
   border-top: 1px solid var(--line);
+  flex-shrink: 0;
 }
 .ft-btn-ghost {
   padding: 7px 12px;
@@ -507,6 +534,11 @@
   display: inline-flex; align-items: center;
 }
 .ft-btn-primary:hover { filter: brightness(1.08); }
+.ft-btn-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: none;
+}
 .ft-btn-danger {
   padding: 7px 14px;
   border-radius: var(--radius);

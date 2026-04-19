@@ -34,6 +34,8 @@ const {
   type: toRef(props, 'type'),
 })
 
+const { picked, noticeOpen, pick, requestBooking } = useBookingPicker()
+
 const typeName = computed(() => bookingTypeLabel(props.type))
 
 const dateLabel = computed(() => {
@@ -44,6 +46,9 @@ const dateLabel = computed(() => {
 })
 
 // Position: anchor right, flip left if it overflows. Vertical clamp 16px.
+// `POP_H` is an estimate; CSS caps the actual height at `100dvh - 32px` and
+// lets the body scroll when content overflows (phones in landscape, etc.).
+// We clamp using the smaller of the two so the popover never renders off-screen.
 const POP_W = 340
 const POP_H = 380
 
@@ -51,11 +56,12 @@ const pos = computed(() => {
   if (typeof window === 'undefined') return { left: 0, top: 0 }
   const vw = window.innerWidth
   const vh = window.innerHeight
+  const h = Math.min(POP_H, vh - 32)
   let left = props.anchor.right + 8
   let top = props.anchor.top
   if (left + POP_W > vw - 16) left = props.anchor.left - POP_W - 8
   if (left < 16) left = 16
-  if (top + POP_H > vh - 16) top = vh - POP_H - 16
+  if (top + h > vh - 16) top = vh - h - 16
   if (top < 16) top = 16
   return { left, top }
 })
@@ -113,16 +119,33 @@ useEscape(() => emit('close'))
           :zone-prefix="t('zones.zonePrefix')"
           :empty-label="t('zones.noZones')"
           :is-yours="isYours"
+          :picked="picked"
+          @pick="pick"
         />
       </div>
 
+      <CaptchaNotice
+        v-if="noticeOpen"
+        variant="desktop"
+      />
+
       <div class="ft-pop-foot">
         <button
+          v-if="noticeOpen"
           type="button"
-          class="ft-btn-ghost"
+          class="ft-btn-primary"
           @click="emit('close')"
         >
-          {{ t('common.close') }}
+          {{ t('common.ok') }}
+        </button>
+        <button
+          v-else
+          type="button"
+          class="ft-btn-primary"
+          :disabled="!picked"
+          @click="requestBooking"
+        >
+          {{ t('zones.book') }}
         </button>
       </div>
     </div>

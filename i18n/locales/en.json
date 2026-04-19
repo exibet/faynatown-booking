@@ -45,7 +45,12 @@
     "availableFew": "available",
     "availableMany": "available",
     "noZones": "No courts available",
-    "zonePrefix": "Zone"
+    "zonePrefix": "Zone",
+    "book": "Book",
+    "captchaTitle": "Can't finalize the booking here",
+    "captchaP1": "The official app protects booking creation with a captcha, so external services can't complete it.",
+    "captchaP2": "For now, you can finalize a booking only in the Faynatown mobile app.",
+    "captchaP3": "Let's ask the management company together to make booking more open — reach out if you have nice ideas."
   },
   "bookings": {
     "title": "My bookings",
@@ -81,6 +86,7 @@
   },
   "common": {
     "close": "Close",
+    "ok": "Got it",
     "profile": "Profile"
   },
   "weather": {

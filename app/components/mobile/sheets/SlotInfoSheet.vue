@@ -31,6 +31,8 @@ const {
   type: toRef(props, 'type'),
 })
 
+const { picked, noticeOpen, pick, requestBooking, reset } = useBookingPicker()
+
 const sheetTitle = computed(() => {
   if (!props.cell || !props.date) return ''
   const d = parseLocalDate(props.date)
@@ -40,6 +42,8 @@ const sheetTitle = computed(() => {
 })
 
 watch(() => [props.open, props.cell?.startHour, props.date], () => {
+  // Reset pick state whenever the sheet opens on a different slot.
+  reset()
   if (props.open) load()
 })
 </script>
@@ -67,15 +71,32 @@ watch(() => [props.open, props.cell?.startHour, props.date], () => {
       :zone-prefix="t('zones.zonePrefix')"
       :empty-label="t('zones.noZones')"
       :is-yours="isYours"
+      :picked="picked"
       :skeleton-count="8"
+      @pick="pick"
+    />
+
+    <CaptchaNotice
+      v-if="noticeOpen"
+      variant="mobile"
     />
 
     <button
+      v-if="noticeOpen"
       type="button"
       class="sh-confirm"
       @click="emit('close')"
     >
-      {{ t('common.close') }}
+      {{ t('common.ok') }}
+    </button>
+    <button
+      v-else
+      type="button"
+      class="sh-confirm"
+      :disabled="!picked"
+      @click="requestBooking"
+    >
+      {{ t('zones.book') }}
     </button>
   </BottomSheet>
 </template>
