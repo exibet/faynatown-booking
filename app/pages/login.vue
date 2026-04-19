@@ -21,13 +21,12 @@ const redirectTo = computed(() => {
   return typeof param === 'string' ? param : '/'
 })
 
-// We intentionally do NOT redirect on cookie presence here. `useAuth`'s
-// `isLoggedIn` is now state-only (true after explicit login or after the
-// auth middleware verified the cookie on SSR for a protected route). If a
-// genuinely-logged-in user types /login, they'll see the form again — minor
-// UX trade-off vs. risking a redirect loop with stale cookies.
+// If a returning user lands on /login with a valid JWT already in
+// localStorage (seeded by `plugins/auth-token.client.ts`), bounce them to
+// the home page. Runs on client hydration only — the plugin is .client.ts
+// so `isLoggedIn` is never true during SSR of this page.
 if (isLoggedIn.value) {
-  await navigateTo(redirectTo.value)
+  await navigateTo(redirectTo.value, { external: true, replace: true })
 }
 
 async function handleSubmit() {
@@ -35,13 +34,14 @@ async function handleSubmit() {
   loading.value = true
   try {
     await login(phoneNumber.value, password.value)
-    // SPA navigation — `useAuth.login()` now stores the JWT in
-    // `useState(STATE_KEY.TOKEN)` and the auth middleware / `createApi`
-    // both read from it, so we don't need a hard reload to let SSR see the
-    // cookie. A hard reload here would actively BREAK iOS Safari: ITP can
-    // drop our cookie between the login POST response and the next top-level
-    // navigation on *.vercel.app, sending the user back to /login.
-    await navigateTo(redirectTo.value)
+    // `external: true` forces a full browser navigation. Needed because
+    // /login is SSR but `/` is SPA (`routeRules.ssr=false`) — Nuxt's
+    // SPA-side router doesn't reliably switch rendering modes mid-nav.
+    // A hard reload is safe now that auth is Bearer-only: `localStorage`
+    // survives the reload, `plugins/auth-token.client.ts` reseeds state,
+    // middleware allows, and `/` renders. `replace: true` drops /login
+    // from history so the back button doesn't return to it.
+    await navigateTo(redirectTo.value, { external: true, replace: true })
   }
   catch {
     toast.error(t('auth.loginError'))
