@@ -21,21 +21,13 @@ export default defineEventHandler((event) => {
   const bearer = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
   const token = bearer || getCookie(event, AUTH_COOKIE_NAME)
   if (token) event.context.token = token
-  // TEMP diagnostic — iOS Safari logs user out after first request.
-  // Distinguish "no cookie at all" from "cookie present but upstream rejects".
-  // Remove once root cause is confirmed.
+  // TEMP diagnostic — verifies the dual-storage fix on iOS. Shows whether
+  // the token arrived via Authorization header or cookie (or not at all).
+  // Remove once we've seen a successful production run on iPhone.
   if (event.path?.startsWith('/api/') && !event.path.startsWith('/api/auth/')) {
-    const cookieHeader = getHeader(event, 'cookie') ?? ''
+    const source = bearer ? 'bearer' : (getCookie(event, AUTH_COOKIE_NAME) ? 'cookie' : 'none')
     const ua = getHeader(event, 'user-agent')?.slice(0, 40) ?? ''
-    const names = cookieHeader
-      .split(';')
-      .map(s => s.trim().split('=')[0])
-      .filter(Boolean)
-      .join(',')
     // eslint-disable-next-line no-console
-    console.warn(
-      `[auth-diag] path=${event.path} hasCookie=${!!token} `
-      + `cookieHeaderLen=${cookieHeader.length} names=[${names}] ua=${ua}`,
-    )
+    console.warn(`[auth-diag] path=${event.path} source=${source} ua=${ua}`)
   }
 })
