@@ -2,6 +2,11 @@ import { API } from '#shared/api'
 import { AUTH_COOKIE_NAME } from '#shared/constants'
 import { STATE_KEY } from '#shared/state-keys'
 
+interface LoginResponse {
+  ok: boolean
+  token: string
+}
+
 export function useAuth() {
   const cookie = useCookie<string | null>(AUTH_COOKIE_NAME)
   // Default false — the cookie is httpOnly and may be present-but-stale.
@@ -9,12 +14,15 @@ export function useAuth() {
   // exists on SSR; explicit `login()` also sets it. This avoids login.vue
   // bouncing the user to / based on a dead cookie (would loop with /api 401).
   const isLoggedIn = useState<boolean>(STATE_KEY.IS_LOGGED_IN, () => false)
+  // JWT mirror for client-side Authorization: Bearer — see STATE_KEY comment.
+  const token = useState<string | null>(STATE_KEY.TOKEN, () => null)
 
   async function login(phoneNumber: string, password: string) {
-    await $fetch(API.AUTH_LOGIN, {
+    const response = await $fetch<LoginResponse>(API.AUTH_LOGIN, {
       method: 'POST',
       body: { phoneNumber, password },
     })
+    token.value = response.token
     isLoggedIn.value = true
   }
 
@@ -28,6 +36,7 @@ export function useAuth() {
       // swallow — nothing actionable for the user
     }
     isLoggedIn.value = false
+    token.value = null
     cookie.value = null
     await navigateTo('/login')
   }

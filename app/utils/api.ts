@@ -38,13 +38,18 @@ export function createApi() {
   const nuxtApp = useNuxtApp()
   const ssrHeaders = import.meta.server ? useRequestHeaders(['cookie']) : undefined
 
+  const token = useState<string | null>(STATE_KEY.TOKEN, () => null)
+
   return $fetch.create({
     onRequest({ options }) {
-      if (ssrHeaders?.cookie) {
-        const headers = new Headers(options.headers)
-        headers.set('cookie', ssrHeaders.cookie)
-        options.headers = headers
-      }
+      const headers = new Headers(options.headers)
+      if (ssrHeaders?.cookie) headers.set('cookie', ssrHeaders.cookie)
+      // Attach the JWT as a Bearer header in addition to the httpOnly cookie.
+      // iOS Safari/ITP drops the cookie between SSR and client XHR on vercel.app,
+      // so relying on the cookie alone logs the user out on the first refetch.
+      // See `server/middleware/auth.ts` for the receiving side.
+      if (token.value) headers.set('authorization', `Bearer ${token.value}`)
+      options.headers = headers
     },
 
     onResponseError({ response }) {
@@ -55,6 +60,7 @@ export function createApi() {
       if (statusCode === 401) {
         const isLoggedIn = useState<boolean>(STATE_KEY.IS_LOGGED_IN)
         isLoggedIn.value = false
+        token.value = null
         toast.error(t('auth.sessionExpired'))
         nuxtApp.runWithContext(() => navigateTo('/login'))
         return
