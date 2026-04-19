@@ -12,7 +12,7 @@ interface SlotSelection {
 // Sync composables are owned by pages/index.vue (called once for both layouts).
 const calendar = useCalendar()
 
-const { dayOffset, currentDate, currentDay, canPrevDay, selectDay, nextDay, prevDay } = useMobileDayNav()
+const { dayOffset, currentDate, currentDay, selectDay, prevWeek, nextWeek, canPrevWeek } = useMobileDayNav()
 
 const openSheet = useState<Sheet>(STATE_KEY.MOBILE_SHEET, () => null)
 // Same useState pattern as desktop popover (STATE_KEY.POPOVER) — one shape per
@@ -41,10 +41,10 @@ function closeSheet() {
     <DateStrip
       :week-dates="calendar.weekDates.value"
       :selected-index="dayOffset"
-      :can-prev="canPrevDay"
+      :can-prev="canPrevWeek"
       @select="selectDay"
-      @prev="prevDay"
-      @next="nextDay"
+      @prev="prevWeek"
+      @next="nextWeek"
     />
     <DayTitle :date="currentDate" />
     <SlotList

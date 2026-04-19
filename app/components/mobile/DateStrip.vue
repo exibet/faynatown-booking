@@ -52,7 +52,7 @@ const cells = computed<DayCell[]>(() => {
     <button
       type="button"
       class="ms-nav"
-      :aria-label="t('calendar.prevDay')"
+      :aria-label="t('calendar.prev')"
       :disabled="!canPrev"
       @click="emit('prev')"
     >
@@ -79,7 +79,7 @@ const cells = computed<DayCell[]>(() => {
     <button
       type="button"
       class="ms-nav"
-      :aria-label="t('calendar.nextDay')"
+      :aria-label="t('calendar.next')"
       @click="emit('next')"
     >
       <Icon name="chevron-right" />

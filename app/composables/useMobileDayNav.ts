@@ -3,10 +3,15 @@ import { addDays, sameDay } from '#shared/utils/datetime'
 import { useToday } from '~/utils/datetime'
 
 /**
- * Encapsulates mobile day-strip navigation: which day is selected, whether
- * prev/next should be enabled, and anchor-shifting when stepping outside the
- * current 7-day window. Extracted from MobileApp.vue so the shell component
- * stays purely declarative.
+ * Mobile day-strip navigation: which day within the 7-day window is selected,
+ * plus week-level arrow nav with auto-reset of the selection to the first day
+ * of the new window. Tapping a specific day cell stays within the current
+ * week; arrows jump a full week and land on offset 0.
+ *
+ * Week-arrow reset rationale: on mobile users almost always want to start
+ * from the beginning of a week when stepping forward — keeping the same
+ * day-of-week offset tends to skip days they'd otherwise scan past. Desktop
+ * uses `HeaderWeekNav` with its own logic and doesn't share this concern.
  */
 export function useMobileDayNav() {
   const calendar = useCalendar()
@@ -25,7 +30,6 @@ export function useMobileDayNav() {
   })
 
   const currentDate = computed(() => addDays(calendar.weekAnchor.value, dayOffset.value))
-  const canPrevDay = computed(() => currentDate.value.getTime() > today.value.getTime())
   const currentDay = computed(() => calendar.week.value?.[dayOffset.value] ?? null)
 
   function selectDay(idx: number): void {
@@ -34,33 +38,25 @@ export function useMobileDayNav() {
     dayOffset.value = idx
   }
 
-  function nextDay(): void {
-    if (dayOffset.value < 6) {
-      dayOffset.value += 1
-      return
-    }
-    calendar.nextWeek()
+  function prevWeek(): void {
+    if (!calendar.canPrevWeek.value) return
+    calendar.prevWeek()
+    // Safe: canPrevWeek guarantees newAnchor >= today, so offset 0 is not past.
     dayOffset.value = 0
   }
 
-  function prevDay(): void {
-    if (!canPrevDay.value) return
-    if (dayOffset.value > 0) {
-      dayOffset.value -= 1
-      return
-    }
-    if (!calendar.canPrevWeek.value) return
-    calendar.prevWeek()
-    dayOffset.value = 6
+  function nextWeek(): void {
+    calendar.nextWeek()
+    dayOffset.value = 0
   }
 
   return {
     dayOffset,
     currentDate,
     currentDay,
-    canPrevDay,
     selectDay,
-    nextDay,
-    prevDay,
+    prevWeek,
+    nextWeek,
+    canPrevWeek: calendar.canPrevWeek,
   }
 }
