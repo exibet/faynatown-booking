@@ -8,6 +8,7 @@ const props = defineProps<{
   weekDates: readonly Date[]
   selectedIndex: number
   canPrev: boolean
+  canNext: boolean
 }>()
 
 const emit = defineEmits<{
@@ -80,6 +81,7 @@ const cells = computed<DayCell[]>(() => {
       type="button"
       class="ms-nav"
       :aria-label="t('calendar.next')"
+      :disabled="!canNext"
       @click="emit('next')"
     >
       <Icon name="chevron-right" />

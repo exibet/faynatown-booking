@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { ZoneGroup } from '~/utils/zone-grouping'
+import type { PickedTile } from '~/composables/useBookingPicker'
 
 /**
  * Shared presenter for the zone-tile grid shown in the desktop booking
@@ -8,9 +9,11 @@ import type { ZoneGroup } from '~/utils/zone-grouping'
  * aligned between the two surfaces.
  *
  * Variant switches the CSS class prefix:
- *   desktop → .ft-pop-units / .ft-pop-zone-* / .ft-unit / is-free|busy|yours
- *   mobile  → .sh-units    / .sh-zone-*    / .sh-unit / is-busy|yours
- * The mobile variant has no `is-free` state class (accent comes from base).
+ *   desktop → .ft-pop-units / .ft-pop-zone-* / .ft-unit / is-free|busy|yours|picked
+ *   mobile  → .sh-units    / .sh-zone-*    / .sh-unit / is-free|busy|yours|picked
+ *
+ * Free (and not-yours) tiles render as real `<button>`s and emit `@pick`
+ * with `{ area, unit }`. Busy / yours tiles are inert `<div>`s.
  */
 interface Props {
   variant: 'desktop' | 'mobile'
@@ -21,12 +24,18 @@ interface Props {
   zonePrefix: string
   emptyLabel: string
   isYours: (area: number, unit: number) => boolean
+  picked?: PickedTile | null
   skeletonCount?: number
 }
 
 const props = withDefaults(defineProps<Props>(), {
   skeletonCount: 6,
+  picked: null,
 })
+
+const emit = defineEmits<{
+  (e: 'pick', payload: PickedTile): void
+}>()
 
 const classes = computed(() => {
   const prefix = props.variant === 'desktop' ? 'ft-pop' : 'sh'
@@ -41,12 +50,9 @@ const classes = computed(() => {
   }
 })
 
-function tileClass(available: boolean, yours: boolean): string[] {
-  const base = classes.value.tile
-  if (yours) return [base, 'is-yours']
-  if (!available) return [base, 'is-busy']
-  // Desktop marks free tiles explicitly; mobile uses base styling.
-  return props.variant === 'desktop' ? [base, 'is-free'] : [base]
+function isPicked(area: number, unit: number): boolean {
+  const p = props.picked
+  return !!p && p.area === area && p.unit === unit
 }
 
 const skeletonHeight = computed(() => props.variant === 'desktop' ? '56px' : '60px')
@@ -85,14 +91,35 @@ const skeletonHeight = computed(() => props.variant === 'desktop' ? '56px' : '60
         {{ zonePrefix }} {{ group.area }}
       </div>
       <div :class="classes.units">
-        <div
+        <template
           v-for="tile in group.units"
           :key="tile.id"
-          :class="tileClass(tile.available, isYours(group.area, tile.unit))"
         >
-          <span :class="classes.num">{{ tile.unit }}</span>
-          <span :class="classes.caption">{{ unitLabel }}</span>
-        </div>
+          <button
+            v-if="tile.available && !isYours(group.area, tile.unit)"
+            type="button"
+            :class="[
+              classes.tile,
+              'is-free',
+              isPicked(group.area, tile.unit) ? 'is-picked' : null,
+            ]"
+            :aria-pressed="isPicked(group.area, tile.unit)"
+            @click="emit('pick', { area: group.area, unit: tile.unit })"
+          >
+            <span :class="classes.num">{{ tile.unit }}</span>
+            <span :class="classes.caption">{{ unitLabel }}</span>
+          </button>
+          <div
+            v-else
+            :class="[
+              classes.tile,
+              isYours(group.area, tile.unit) ? 'is-yours' : 'is-busy',
+            ]"
+          >
+            <span :class="classes.num">{{ tile.unit }}</span>
+            <span :class="classes.caption">{{ unitLabel }}</span>
+          </div>
+        </template>
       </div>
     </div>
   </template>

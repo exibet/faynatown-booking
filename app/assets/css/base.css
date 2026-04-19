@@ -106,3 +106,32 @@ a {
   animation: ftShimmer 1.4s linear infinite;
   border-radius: var(--radius);
 }
+
+/* Warning banner — used by `CaptchaNotice.vue` inside both the desktop
+   booking popover and the mobile slot sheet. Base styling is shared;
+   --desktop / --mobile modifiers tune paddings + type for the surface. */
+.ft-notice {
+  background: color-mix(in oklch, var(--bg), var(--warning) 10%);
+  border: 1px solid color-mix(in oklch, var(--line), var(--warning) 50%);
+  border-left: 3px solid var(--warning);
+}
+.ft-notice-title { font-weight: 600; color: var(--warning); margin-bottom: 6px; }
+.ft-notice-p { color: var(--ink-2); line-height: 1.5; margin: 0; }
+.ft-notice-p + .ft-notice-p { margin-top: 6px; }
+
+.ft-notice--desktop {
+  flex-shrink: 0;
+  margin: 0 12px;
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+.ft-notice--desktop .ft-notice-title { font-size: 12px; }
+.ft-notice--desktop .ft-notice-p { font-size: 12px; }
+
+.ft-notice--mobile {
+  margin-bottom: 12px;
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+.ft-notice--mobile .ft-notice-title { font-size: 13px; }
+.ft-notice--mobile .ft-notice-p { font-size: 13px; }

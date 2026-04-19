@@ -351,10 +351,22 @@
   border-radius: 8px;
   display: flex; flex-direction: column; align-items: center; gap: 3px;
   color: var(--ink);
+  font-family: inherit;
+  transition: border-color .15s, background-color .15s, color .15s, transform .08s;
 }
 .sh-unit-num { font-family: var(--font-num); font-size: 20px; font-weight: 500; }
 .sh-unit-label { font-size: 10px; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.08em; }
-.sh-unit.is-busy { opacity: 0.3; }
+.sh-unit.is-free {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.sh-unit.is-picked {
+  border-color: var(--accent);
+  background: var(--accent-weak);
+  color: var(--accent-ink);
+}
+.sh-unit.is-picked .sh-unit-label { color: inherit; opacity: 0.85; }
+.sh-unit.is-busy { opacity: 0.3; cursor: not-allowed; }
 .sh-unit.is-yours {
   background: var(--yours-weak);
   border-color: var(--yours);
@@ -362,6 +374,8 @@
   box-shadow: inset 3px 0 0 var(--yours);
 }
 .sh-unit.is-yours .sh-unit-label { color: inherit; opacity: 0.85; }
+
+/* Captcha notice styles are shared primitives — see `.ft-notice*` in base.css. */
 
 .sh-confirm {
   width: 100%;
@@ -372,6 +386,11 @@
   font-weight: 600;
   border-radius: 8px;
   margin-top: 6px;
+}
+.sh-confirm { -webkit-tap-highlight-color: transparent; }
+.sh-confirm:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 /* Toast styles are in desktop.css (`.ft-toast*`) and shared across layouts. */

@@ -32,6 +32,26 @@ describe('useCalendar', () => {
     expect(weekAnchor.value.getTime()).toBe(before + 7 * 24 * 60 * 60 * 1000)
   })
 
+  it('canNextWeek caps forward nav at current + 2 weeks', () => {
+    const { canNextWeek } = useCalendar()
+    // Anchor = today → next (today+7) is still within the +2 horizon.
+    expect(canNextWeek.value).toBe(true)
+    useState<Date>(STATE_KEY.WEEK_ANCHOR).value = addDays(todayLocal(), 7)
+    expect(canNextWeek.value).toBe(true)
+    useState<Date>(STATE_KEY.WEEK_ANCHOR).value = addDays(todayLocal(), 14)
+    // Anchor is already the furthest allowed window; one more step would
+    // land at today+21, past the current+2 limit.
+    expect(canNextWeek.value).toBe(false)
+  })
+
+  it('nextWeek() is a no-op once the forward cap is reached', () => {
+    useState<Date>(STATE_KEY.WEEK_ANCHOR).value = addDays(todayLocal(), 14)
+    const { nextWeek, weekAnchor } = useCalendar()
+    const before = weekAnchor.value.getTime()
+    nextWeek()
+    expect(weekAnchor.value.getTime()).toBe(before)
+  })
+
   it('goToToday() resets anchor to today', () => {
     useState<Date>(STATE_KEY.WEEK_ANCHOR).value = addDays(todayLocal(), 21)
     const { goToToday, weekAnchor } = useCalendar()

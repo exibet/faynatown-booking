@@ -6,6 +6,13 @@ import type { BookingTypeParam } from '#shared/constants'
 import type { CalendarWeek } from '#shared/types'
 import { addDays, formatLocalDate, todayLocal } from '#shared/utils/datetime'
 import { initialOnlyCache } from '~/utils/async-data'
+import { getStoredBookingType, setStoredBookingType } from '~/utils/booking-type-storage'
+
+// Forward navigation cap: current week + this many windows ahead = the full
+// horizon the user can see. Enforced by `canNextWeek` / `nextWeek`. Bumping
+// this is a UX decision, not an API one — the fetch endpoint is week-scoped
+// and has no upstream horizon of its own.
+const MAX_WEEKS_AHEAD = 2
 
 // Private state keys shared between useCalendar() and useCalendarSync().
 // Grouped here so a typo creates a compile error instead of a silent second
@@ -20,7 +27,10 @@ const K = {
 
 function calendarState() {
   const weekAnchor = useState<Date>(K.WEEK_ANCHOR, () => todayLocal())
-  const selectedType = useState<BookingTypeParam>(K.SELECTED_TYPE, () => DEFAULT_BOOKING_TYPE)
+  const selectedType = useState<BookingTypeParam>(
+    K.SELECTED_TYPE,
+    () => getStoredBookingType() ?? DEFAULT_BOOKING_TYPE,
+  )
   const pending = useState<boolean>(K.PENDING, () => false)
   const lastUpdated = useState<Date | null>(K.LAST_UPDATED, () => null)
   const refreshTick = useState<number>(K.REFRESH_TICK, () => 0)
@@ -55,12 +65,23 @@ export function useCalendar() {
     return addDays(weekAnchor.value, -7).getTime() >= todayLocal().getTime()
   })
 
+  // Forward cap: user sees the current week + `MAX_WEEKS_AHEAD` further
+  // windows. Beyond that the upstream data is both uninteresting (bookings
+  // open on a rolling window) and an unbounded-request invitation — this
+  // keeps the data envelope to 3 weeks no matter how long the user holds
+  // the arrow.
+  const canNextWeek = computed(() => {
+    const maxAnchor = addDays(todayLocal(), 7 * MAX_WEEKS_AHEAD)
+    return addDays(weekAnchor.value, 7).getTime() <= maxAnchor.getTime()
+  })
+
   function prevWeek(): void {
     if (!canPrevWeek.value) return
     weekAnchor.value = addDays(weekAnchor.value, -7)
   }
 
   function nextWeek(): void {
+    if (!canNextWeek.value) return
     weekAnchor.value = addDays(weekAnchor.value, 7)
   }
 
@@ -70,6 +91,7 @@ export function useCalendar() {
 
   function setType(type: BookingTypeParam): void {
     selectedType.value = type
+    setStoredBookingType(type)
   }
 
   function refresh(): void {
@@ -84,6 +106,7 @@ export function useCalendar() {
     pending: readonly(pending),
     lastUpdated: readonly(lastUpdated),
     canPrevWeek,
+    canNextWeek,
     prevWeek,
     nextWeek,
     goToToday,
