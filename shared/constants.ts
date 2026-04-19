@@ -111,7 +111,7 @@ export function typeIdOf(param: BookingTypeParam): BookingTypeId {
 
 // Operating hours per booking type (inclusive start, exclusive end).
 export const OPERATING_HOURS: Record<BookingTypeParam, { start: number, end: number }> = {
-  BBQ: { start: 9, end: 21 },
+  BBQ: { start: 9, end: 22 },
   Tennis: { start: 7, end: 22 },
   Basketball: { start: 7, end: 22 },
   Volleyball: { start: 7, end: 22 },
