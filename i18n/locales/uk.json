@@ -84,5 +84,20 @@
   "common": {
     "close": "Закрити",
     "profile": "Профіль"
+  },
+  "weather": {
+    "clear": "Ясно",
+    "mainlyClear": "Переважно ясно",
+    "partlyCloudy": "Мінлива хмарність",
+    "overcast": "Хмарно",
+    "fog": "Туман",
+    "drizzle": "Мряка",
+    "rain": "Дощ",
+    "showers": "Злива",
+    "snow": "Сніг",
+    "snowShowers": "Снігопад",
+    "thunderstorm": "Гроза",
+    "unknown": "Погода",
+    "tempRange": "{min}° … {max}°"
   }
 }

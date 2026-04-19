@@ -84,5 +84,20 @@
   "common": {
     "close": "Close",
     "profile": "Profile"
+  },
+  "weather": {
+    "clear": "Clear",
+    "mainlyClear": "Mostly clear",
+    "partlyCloudy": "Partly cloudy",
+    "overcast": "Overcast",
+    "fog": "Fog",
+    "drizzle": "Drizzle",
+    "rain": "Rain",
+    "showers": "Showers",
+    "snow": "Snow",
+    "snowShowers": "Snow showers",
+    "thunderstorm": "Thunderstorm",
+    "unknown": "Weather",
+    "tempRange": "{min}° … {max}°"
   }
 }

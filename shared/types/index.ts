@@ -86,3 +86,20 @@ export interface BookingItem {
   isActive: boolean
   canCancel: boolean
 }
+
+// ---------------------------------------------------------------------------
+// Weather (Open-Meteo) — future-only daily forecast
+//
+// `date` is `YYYY-MM-DD` local. Temperatures already rounded on the server so
+// the client can render without formatting logic. `code` is a WMO weather
+// interpretation code (see `shared/utils/weather.ts` for the icon mapping).
+// ---------------------------------------------------------------------------
+
+export interface WeatherDay {
+  date: string
+  code: number
+  tempMaxC: number
+  tempMinC: number
+}
+
+export type WeatherForecast = WeatherDay[]

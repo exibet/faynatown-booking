@@ -15,6 +15,13 @@ type IconName
     | 'user'
     | 'calendar'
     | 'refresh'
+    | 'w-sun'
+    | 'w-cloud-sun'
+    | 'w-cloud'
+    | 'w-cloud-fog'
+    | 'w-cloud-rain'
+    | 'w-cloud-snow'
+    | 'w-cloud-lightning'
 
 defineProps<{
   name: IconName
@@ -155,6 +162,132 @@ defineProps<{
       <polyline points="23 4 23 10 17 10" />
       <polyline points="1 20 1 14 7 14" />
       <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+    </template>
+    <template v-else-if="name === 'w-sun'">
+      <circle
+        cx="12"
+        cy="12"
+        r="5"
+        fill="currentColor"
+        stroke="none"
+      />
+      <path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4" />
+    </template>
+    <template v-else-if="name === 'w-cloud-sun'">
+      <path d="M13 5V3M18.4 7.6l1.4-1.4M20 11h2M6.4 7.6 5 6.2" />
+      <circle
+        cx="13"
+        cy="11"
+        r="3"
+        fill="currentColor"
+        stroke="none"
+      />
+      <path
+        d="M16 18a4 4 0 0 0-7.8-1.2A3 3 0 1 0 8 22h8a3 3 0 0 0 0-6h-.2"
+        fill="currentColor"
+        stroke="none"
+      />
+    </template>
+    <template v-else-if="name === 'w-cloud'">
+      <path
+        d="M17.5 19a4.5 4.5 0 0 0-1-8.9A6 6 0 0 0 5 11.5 4 4 0 0 0 6 19h11.5z"
+        fill="currentColor"
+        stroke="none"
+      />
+    </template>
+    <template v-else-if="name === 'w-cloud-fog'">
+      <path
+        d="M17.5 16a4.5 4.5 0 0 0-1-8.9A6 6 0 0 0 5 8.5 4 4 0 0 0 6 16h11.5z"
+        fill="currentColor"
+        stroke="none"
+      />
+      <line
+        x1="4"
+        y1="19"
+        x2="20"
+        y2="19"
+      />
+      <line
+        x1="7"
+        y1="22"
+        x2="17"
+        y2="22"
+      />
+    </template>
+    <template v-else-if="name === 'w-cloud-rain'">
+      <path
+        d="M17.5 15a4.5 4.5 0 0 0-1-8.9A6 6 0 0 0 5 7.5 4 4 0 0 0 6 15h11.5z"
+        fill="currentColor"
+        stroke="none"
+      />
+      <line
+        x1="9"
+        y1="18"
+        x2="8"
+        y2="21"
+      />
+      <line
+        x1="13"
+        y1="18"
+        x2="12"
+        y2="21"
+      />
+      <line
+        x1="17"
+        y1="18"
+        x2="16"
+        y2="21"
+      />
+    </template>
+    <template v-else-if="name === 'w-cloud-snow'">
+      <path
+        d="M17.5 15a4.5 4.5 0 0 0-1-8.9A6 6 0 0 0 5 7.5 4 4 0 0 0 6 15h11.5z"
+        fill="currentColor"
+        stroke="none"
+      />
+      <line
+        x1="8"
+        y1="19"
+        x2="8"
+        y2="19.01"
+      />
+      <line
+        x1="12"
+        y1="19"
+        x2="12"
+        y2="19.01"
+      />
+      <line
+        x1="16"
+        y1="19"
+        x2="16"
+        y2="19.01"
+      />
+      <line
+        x1="10"
+        y1="22"
+        x2="10"
+        y2="22.01"
+      />
+      <line
+        x1="14"
+        y1="22"
+        x2="14"
+        y2="22.01"
+      />
+    </template>
+    <template v-else-if="name === 'w-cloud-lightning'">
+      <path
+        d="M17.5 14a4.5 4.5 0 0 0-1-8.9A6 6 0 0 0 5 6.5 4 4 0 0 0 6 14h11.5z"
+        fill="currentColor"
+        stroke="none"
+      />
+      <polyline
+        points="13 12 9 18 13 18 11 22"
+        fill="currentColor"
+        stroke="currentColor"
+        stroke-width="0.8"
+      />
     </template>
   </svg>
 </template>

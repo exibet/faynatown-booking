@@ -5,6 +5,7 @@ export const API = {
   BOOKINGS: '/api/bookings',
   ZONES: '/api/zones',
   FLATS: '/api/flats',
+  WEATHER: '/api/weather',
 } as const
 
 export type ApiRoute = typeof API[keyof typeof API]

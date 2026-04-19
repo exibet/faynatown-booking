@@ -130,3 +130,18 @@ export const AUTH_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 89
 // Suffixes the API appends to text fields when an item is unavailable.
 // We detect both and strip them when rendering.
 export const UNAVAILABLE_SUFFIXES = ['(недоступно)', '(зайнято)'] as const
+
+// Faynatown residential complex coordinates (Kyiv).
+// Used as a fixed location for the Open-Meteo weather forecast — every user
+// sees the same forecast regardless of where they currently are.
+export const FAYNATOWN_COORDS = {
+  latitude: 50.4700198,
+  longitude: 30.3989502,
+  timezone: 'Europe/Kyiv',
+} as const
+
+// Open-Meteo returns 16-day forecasts but accuracy past ~14 days drops
+// sharply. Clamp the window so we don't render numbers we don't trust.
+export const WEATHER_FORECAST_DAYS = 14
+
+export const OPEN_METEO_FORECAST_URL = 'https://api.open-meteo.com/v1/forecast'

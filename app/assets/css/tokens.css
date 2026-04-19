@@ -6,9 +6,10 @@
 
 :root {
   --accent: oklch(0.62 0.13 155);
-  /* Softer free-slot tint for dark theme — lower chroma + slightly darker
-     base reads less aggressive on a black calendar. */
-  --accent-weak: oklch(0.30 0.05 155);
+  /* Free-slot tint for dark theme — bright enough to read as a filled card
+     against the near-black calendar bg, but still soft so it doesn't
+     compete with the solid --accent used for CTAs. */
+  --accent-weak: oklch(0.40 0.07 155);
   /* Text color on the PALE `--accent-weak` bg — flips dark/light per theme
      so it contrasts with the tint behind it. */
   --accent-ink: oklch(0.92 0.04 155);
@@ -36,7 +37,7 @@
   --busy-ink: oklch(0.62 0.005 240);
 
   --yours: oklch(0.55 0.14 250);
-  --yours-weak: oklch(0.30 0.09 250);
+  --yours-weak: oklch(0.40 0.11 250);
   --yours-ink: oklch(0.95 0.04 250);
 
   --danger: oklch(0.68 0.17 25);

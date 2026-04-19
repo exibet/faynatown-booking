@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import { isPastDay } from '#shared/utils/datetime'
+import { formatLocalDate, isPastDay } from '#shared/utils/datetime'
+import { describeWeatherCode } from '#shared/utils/weather'
+import type { WeatherIconName } from '#shared/utils/weather'
 import { dayShortName, useToday } from '~/utils/datetime'
 
 const props = defineProps<{
@@ -16,6 +18,7 @@ const emit = defineEmits<{
 const { t } = useI18n()
 const appLocale = useAppLocale()
 const today = useToday()
+const weather = useWeather()
 
 interface DayCell {
   index: number
@@ -24,17 +27,23 @@ interface DayCell {
   num: string
   isPast: boolean
   isActive: boolean
+  weatherIcon: WeatherIconName | null
 }
 
 const cells = computed<DayCell[]>(() => {
-  return props.weekDates.map((d, idx) => ({
-    index: idx,
-    date: d,
-    name: dayShortName(d, appLocale.value),
-    num: String(d.getDate()).padStart(2, '0'),
-    isPast: isPastDay(d, today.value),
-    isActive: idx === props.selectedIndex,
-  }))
+  return props.weekDates.map((d, idx) => {
+    const past = isPastDay(d, today.value)
+    const w = past ? undefined : weather.forDate(formatLocalDate(d))
+    return {
+      index: idx,
+      date: d,
+      name: dayShortName(d, appLocale.value),
+      num: String(d.getDate()).padStart(2, '0'),
+      isPast: past,
+      isActive: idx === props.selectedIndex,
+      weatherIcon: w ? describeWeatherCode(w.code).icon : null,
+    }
+  })
 })
 </script>
 
@@ -60,6 +69,11 @@ const cells = computed<DayCell[]>(() => {
       >
         <span class="ms-day-name">{{ cell.name }}</span>
         <span class="ms-day-num">{{ cell.num }}</span>
+        <Icon
+          v-if="cell.weatherIcon"
+          :name="cell.weatherIcon"
+          class="ms-day-wx"
+        />
       </button>
     </div>
     <button
