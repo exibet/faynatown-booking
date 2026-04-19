@@ -1,37 +1,26 @@
 import { BOOKING_TYPE_PARAMS, BOOKING_TYPE_STORAGE_KEY } from '#shared/constants'
 import type { BookingTypeParam } from '#shared/constants'
+import { createSafeStorage } from '~/utils/safe-storage'
 
 /**
- * Persistent store for the last-picked booking type. Mirrors the contract of
- * `auth-storage.ts` — `import.meta.client` + `try/catch` so SSR and Safari
- * private mode degrade silently to the in-memory default.
- *
- * Reads are validated against `BOOKING_TYPE_PARAMS` so a stale / hand-edited
- * localStorage value can never smuggle an unknown string into state; an
- * unknown value is treated as absent and the caller falls back to the default.
+ * Persistent store for the last-picked booking type. SSR + private-mode
+ * guards come from `createSafeStorage`; this module layers the domain
+ * validation on top — a stale / hand-edited localStorage value is treated
+ * as absent so `useCalendar` falls back to `DEFAULT_BOOKING_TYPE` instead
+ * of smuggling an unknown string into state.
  */
+
+const store = createSafeStorage(BOOKING_TYPE_STORAGE_KEY)
 
 function isBookingTypeParam(value: string): value is BookingTypeParam {
   return (BOOKING_TYPE_PARAMS as readonly string[]).includes(value)
 }
 
 export function getStoredBookingType(): BookingTypeParam | null {
-  if (!import.meta.client) return null
-  try {
-    const v = localStorage.getItem(BOOKING_TYPE_STORAGE_KEY)
-    return v && isBookingTypeParam(v) ? v : null
-  }
-  catch {
-    return null
-  }
+  const v = store.get()
+  return v && isBookingTypeParam(v) ? v : null
 }
 
 export function setStoredBookingType(type: BookingTypeParam): void {
-  if (!import.meta.client) return
-  try {
-    localStorage.setItem(BOOKING_TYPE_STORAGE_KEY, type)
-  }
-  catch {
-    // best-effort — see auth-storage module doc
-  }
+  store.set(type)
 }
