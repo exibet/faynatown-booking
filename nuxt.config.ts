@@ -7,12 +7,24 @@
  *
  * Head meta/link tags split:
  * - Static (favicons, manifest, theme-color, viewport, apple-web-app) live
- *   here so they render on first SSR paint without waiting on i18n.
+ *   here so they render into the initial HTML shell without waiting on the
+ *   app bundle (even in SPA mode, Nuxt emits the head chunk server-side).
  * - Dynamic OG / title / description live in `app.vue` via `useSeoMeta` so
  *   they stay reactive to locale changes.
  */
 export default defineNuxtConfig({
   modules: ['@nuxtjs/i18n', '@nuxtjs/google-fonts'],
+
+  // SPA mode (no SSR). The app is a residents-only tool — no SEO, no
+  // anonymous browsing surface, all data is per-user. SSR added complexity
+  // (cookie-dropped-by-iOS-ITP auth path, SPA↔SSR mode-switching on nav)
+  // without any user-visible benefit: the calendar and bookings fetch
+  // client-side via Bearer XHR regardless of render mode. `/login` is also
+  // SPA, so top-level navigation between the two routes is natural.
+  // Nitro still runs — server routes (`/api/*`) continue to work as a
+  // proxy layer that injects `version: 45` and the Bearer from request
+  // context into upstream Faynatown calls.
+  ssr: false,
 
   // Flatten component names — `app/components/ui/ToastHost.vue` resolves as
   // `<ToastHost>` (not `<UiToastHost>`), matching how the components were
@@ -66,17 +78,6 @@ export default defineNuxtConfig({
     '~/assets/css/desktop.css',
     '~/assets/css/mobile.css',
   ],
-
-  // Render the homepage as SPA (no SSR). Reason: iOS Safari on *.vercel.app
-  // drops our httpOnly cookie on tab-kill/swipe-up, so SSR of `/` arrives with
-  // no auth and the route middleware would redirect to /login. With ssr:false,
-  // the client boots, `plugins/auth-token.client.ts` seeds state from
-  // localStorage, and middleware sees isLoggedIn=true before rendering. User
-  // data (calendar/bookings) fetches client-side anyway, so the SSR loss is
-  // imperceptible. /login keeps SSR (no auth needed to render the form).
-  routeRules: {
-    '/': { ssr: false },
-  },
 
   devServer: {
     port: 3500,
