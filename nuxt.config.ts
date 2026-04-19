@@ -24,7 +24,15 @@ export default defineNuxtConfig({
     head: {
       meta: [
         { charset: 'utf-8' },
-        { name: 'viewport', content: 'width=device-width, initial-scale=1, viewport-fit=cover' },
+        // `maximum-scale=1` + `user-scalable=no` disable pinch-zoom — the
+        // calendar grid is tuned for fixed breakpoints and pinch-zoomed
+        // layouts overflow. System-level text zoom (iOS Accessibility) still
+        // works, so low-vision users aren't locked out.
+        {
+          name: 'viewport',
+          content: 'width=device-width, initial-scale=1, maximum-scale=1, '
+            + 'user-scalable=no, viewport-fit=cover',
+        },
         // Matches --bg in dark theme; inline theme-init.js sets [data-theme]
         // before hydration so the browser chrome colour-matches the app.
         { name: 'theme-color', content: '#1A1D20', media: '(prefers-color-scheme: dark)' },

@@ -21,13 +21,4 @@ export default defineEventHandler((event) => {
   const bearer = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
   const token = bearer || getCookie(event, AUTH_COOKIE_NAME)
   if (token) event.context.token = token
-  // TEMP diagnostic — verifies the dual-storage fix on iOS. Shows whether
-  // the token arrived via Authorization header or cookie (or not at all).
-  // Remove once we've seen a successful production run on iPhone.
-  if (event.path?.startsWith('/api/') && !event.path.startsWith('/api/auth/')) {
-    const source = bearer ? 'bearer' : (getCookie(event, AUTH_COOKIE_NAME) ? 'cookie' : 'none')
-    const ua = getHeader(event, 'user-agent')?.slice(0, 40) ?? ''
-    // eslint-disable-next-line no-console
-    console.warn(`[auth-diag] path=${event.path} source=${source} ua=${ua}`)
-  }
 })
