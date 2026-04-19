@@ -6,9 +6,9 @@ import { STATE_KEY } from '#shared/state-keys'
  *
  * Sole source of truth: `useState(IS_LOGGED_IN)`. Seeded on client boot by
  * `plugins/auth-token.client.ts` from localStorage, and by `useAuth.login()`
- * after a successful auth call. No cookie fallback — the app uses Bearer-only
- * auth on the wire, and `routeRules: { '/': { ssr: false } }` means the
- * homepage never SSR-renders so there's no server-side cookie read path.
+ * after a successful auth call. No cookie fallback — the app is Bearer-only
+ * on the wire and runs as SPA (`ssr: false`), so every auth decision lives
+ * on the client.
  */
 export default defineNuxtRouteMiddleware((to) => {
   const isLoggedIn = useState<boolean>(STATE_KEY.IS_LOGGED_IN, () => false)

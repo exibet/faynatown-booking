@@ -12,9 +12,8 @@ import { getAuthToken } from '~/utils/auth-storage'
  * Why localStorage and not the httpOnly cookie: iOS Safari on *.vercel.app
  * (Public Suffix List) drops our cookie when the user swipes up to kill the
  * tab. localStorage survives that lifecycle, so it's the only persistent
- * store we can rely on for the JWT. `/` is rendered as SPA (`routeRules`)
- * so this plugin fully owns the auth-boot path; `/login` has SSR but
- * doesn't require auth to render.
+ * store we can rely on for the JWT. The app runs as SPA (`ssr: false`) so
+ * this plugin fully owns the auth-boot path on every page load.
  */
 export default defineNuxtPlugin(() => {
   const token = useState<string | null>(STATE_KEY.TOKEN, () => null)

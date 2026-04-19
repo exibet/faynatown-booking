@@ -7,8 +7,8 @@ import { LoginSchema } from '~~/server/schemas/auth'
  * `Authorization: Bearer` on every subsequent XHR.
  *
  * No server-set cookie: iOS Safari on *.vercel.app drops httpOnly cookies on
- * tab-kill, and with `routeRules: { '/': { ssr: false } }` we have no SSR
- * auth path that needs a cookie anyway — Bearer is the single wire channel.
+ * tab-kill, and the app runs as SPA (`ssr: false` in nuxt.config) so there's
+ * no SSR auth path that needs a cookie — Bearer is the single wire channel.
  *
  * The upstream sometimes returns the JWT wrapped in JSON quotes ("eyJ...")
  * depending on Content-Type negotiation, so we strip surrounding quotes and

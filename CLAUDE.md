@@ -14,7 +14,7 @@ Read these files before starting any implementation work.
 
 ## Tech Stack
 
-- **Nuxt 4** (SSR) + **Vue 3.5**
+- **Nuxt 4** (SPA mode, `ssr: false` in `nuxt.config.ts` — residents-only tool, Bearer-only auth, SSR gave no user-visible win) + **Vue 3.5**
 - **Pure CSS** on OKLCH tokens (`app/assets/css/{tokens,base,desktop,mobile}.css`) — no PrimeVue, no Tailwind, no UI framework
 - **Custom calendar grid** (`app/components/calendar/WeekGrid.vue` + `SlotButton.vue`) — no FullCalendar
 - **Zod** — server-side query/body validation
@@ -28,7 +28,7 @@ Read these files before starting any implementation work.
 Layering:
 
 - `shared/` — types (`BookingItem`, `CalendarWeek`, ...), constants (`BOOKING_TYPES`, `FAYNATOWN_API_VERSION`), API route strings (`API.*`), fetch keys (`FETCH_KEY.*`), state keys (`STATE_KEY.*`), pure date utils (`shared/utils/datetime.ts`)
-- `server/` — API proxy to `webapi.faynatown.com.ua`, auth via httpOnly cookie, Zod validation, upstream adapters (`server/utils/upstream.ts`, `server/utils/slot-parser.ts`)
+- `server/` — API proxy to `webapi.faynatown.com.ua`, auth via `Authorization: Bearer` header (client-attached from localStorage — no cookies), Zod validation, upstream adapters (`server/utils/upstream.ts`, `server/utils/slot-parser.ts`)
 - `app/` — composables (`useCalendar`, `useBookings`, `useFlat`, `useZones`, `useTheme`, `useToast`, `useConfirm`, ...), pure-CSS components, `createApi()` with global error toast
 - Theme switch via `[data-theme="light|dark"]` on `<html>`; `public/theme-init.js` runs pre-hydration to avoid FOUC
 
@@ -51,7 +51,7 @@ Both `DesktopApp` and `MobileApp` are rendered simultaneously; CSS `@media (max-
 - **No reactive object mutation** — always spread-replace (`state.value = { ...state.value, key: v }`).
 - **No `clearNuxtData`** — use emit + refresh tick pattern (see `useBookings.cancel`).
 - **Guard skeleton components** with proper loading states (`.ft-skel` primitive lives in `base.css`).
-- **Use `useAsyncData` with `FETCH_KEY.*`** — never raw `$fetch` in components. Auth is the single exception: `useAuth.login/logout` call `$fetch` directly because login doesn't need SSR caching and logout must not tigger the global error toast.
+- **Use `useAsyncData` with `FETCH_KEY.*`** — never raw `$fetch` in components. Auth is the single exception: `useAuth.login` calls `$fetch` directly because login doesn't need the async-data caching layer.
 - **Server routes** must call `requireAuth(event)` first, then `$faynatown()` — never raw `$fetch` to the upstream API.
 - **State keys** live in `shared/state-keys.ts#STATE_KEY` — adding a `useState(<string-literal>)` is forbidden.
 - **Fetch keys** live in `shared/fetch-keys.ts#FETCH_KEY`.

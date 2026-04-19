@@ -18,8 +18,8 @@ function isApiError(value: unknown): value is ApiErrorShape {
  * Auth: attaches `Authorization: Bearer <jwt>` from `useState(TOKEN)` on every
  * request. That state is seeded on client boot by `plugins/auth-token.client`
  * (from localStorage) and updated by `useAuth.login()`. No cookie forwarding
- * — the app is Bearer-only since the iOS cookie-drop cleanup; the homepage
- * is SPA (`routeRules.ssr=false`) so there's no SSR auth path either.
+ * — the app is Bearer-only since the iOS cookie-drop cleanup and runs as SPA
+ * (`ssr: false`), so there's no SSR auth path either.
  *
  * On 401 from upstream we clear the in-memory state + localStorage mirror
  * and navigate to /login via the captured Nuxt context.
