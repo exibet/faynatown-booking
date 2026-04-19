@@ -4,11 +4,11 @@
  */
 export const STATE_KEY = {
   IS_LOGGED_IN: 'auth:is-logged-in',
-  // JWT mirror for client-side XHR. Mirrors the httpOnly cookie because iOS
-  // Safari/ITP can drop the cookie between SSR and client fetches on
-  // *.vercel.app (Public Suffix List domain). Source of truth remains the
-  // cookie for SSR/navigation; this state is seeded from the server via a
-  // Nuxt plugin so client requests can attach Authorization: Bearer headers.
+  // JWT mirror for client-side XHR. Bearer-only auth (no cookie): iOS Safari
+  // on *.vercel.app drops cookies on tab-kill. Seeded on client boot by
+  // `plugins/auth-token.client.ts` (from localStorage — survives tab-kill)
+  // and by `useAuth.login()` on fresh auth. `createApi` reads this to attach
+  // `Authorization: Bearer` to every XHR.
   TOKEN: 'auth:token',
   THEME_PREF: 'theme:preference',
   THEME_RESOLVED: 'theme:resolved',

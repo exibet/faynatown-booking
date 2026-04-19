@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { AUTH_COOKIE_NAME, FAYNATOWN_API_VERSION, FAYNATOWN_BASE_URL } from '#shared/constants'
+import { FAYNATOWN_API_VERSION, FAYNATOWN_BASE_URL } from '#shared/constants'
 
 interface FaynatownOptions {
   method?: 'GET' | 'POST'
@@ -21,13 +21,12 @@ interface FaynatownOptions {
  *
  * Mandatory quirks (see docs/API.md):
  * - `version: 45` header on EVERY request, otherwise API returns 400
- * - `Authorization: Bearer <jwt>` from event context (cookie)
+ * - `Authorization: Bearer <jwt>` from event context (set from Bearer header)
  * - Login returns plain-text JWT (not JSON) — pass `asText: true`
  *
- * On upstream 401 we proactively clear our auth cookie so the next request
- * is correctly redirected to /login by the route middleware. Without this,
- * a stale-but-present cookie can cause a redirect loop (middleware allows
- * → data 401 → redirect → middleware allows → ...).
+ * On upstream 401 we throw 401 back to the caller — `createApi` on the
+ * client catches this, clears the token mirror in state + localStorage, and
+ * navigates to /login. Server has no cookie to invalidate (Bearer-only auth).
  *
  * Throws H3Error with upstream status preserved.
  */
@@ -74,9 +73,6 @@ export async function $faynatown<T>(
   })
 
   if (!response.ok) {
-    if (response.status === 401 && !options.skipAuth) {
-      deleteCookie(event, AUTH_COOKIE_NAME)
-    }
     const errorText = await response.text().catch(() => '')
     throw createError({
       statusCode: response.status,

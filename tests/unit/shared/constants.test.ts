@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  AUTH_COOKIE_MAX_AGE_SECONDS,
-  AUTH_COOKIE_NAME,
+  AUTH_STORAGE_KEY,
   BOOKING_TYPES,
   BOOKING_TYPE_PARAMS,
   DEFAULT_BOOKING_TYPE,
@@ -76,9 +75,7 @@ describe('shared/constants', () => {
     expect(FAYNATOWN_BASE_URL).toBe('https://webapi.faynatown.com.ua/api')
   })
 
-  it('auth cookie max age is under JWT 90-day lifetime', () => {
-    const ninetyDays = 60 * 60 * 24 * 90
-    expect(AUTH_COOKIE_MAX_AGE_SECONDS).toBeLessThan(ninetyDays)
-    expect(AUTH_COOKIE_NAME).toBe('faynatown_token')
+  it('auth storage key is namespaced', () => {
+    expect(AUTH_STORAGE_KEY).toBe('faynatown:token')
   })
 })

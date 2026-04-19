@@ -120,12 +120,13 @@ export const FAYNATOWN_API_VERSION = 45
 
 export const FAYNATOWN_BASE_URL = 'https://webapi.faynatown.com.ua/api'
 
-// httpOnly cookie for storing the JWT (set server-side on login).
-export const AUTH_COOKIE_NAME = 'faynatown_token'
-
-// JWT from the Faynatown API lives ~90 days. Expire our cookie a day earlier
-// so we force relogin before the token is actually rejected.
-export const AUTH_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 89
+// localStorage key for the JWT on the client. Primary (and only) persistent
+// auth store: iOS Safari on *.vercel.app (Public Suffix List) drops cookies
+// on tab-kill, so we standardised on Bearer-only auth with localStorage as
+// the persistence layer. Written by `useAuth.login`, read by
+// `plugins/auth-token.client.ts` to seed the in-memory state before the auth
+// middleware runs. Cleared on logout or upstream 401.
+export const AUTH_STORAGE_KEY = 'faynatown:token'
 
 // Suffixes the API appends to text fields when an item is unavailable.
 // We detect both and strip them when rendering.

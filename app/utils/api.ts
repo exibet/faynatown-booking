@@ -1,4 +1,5 @@
 import { STATE_KEY } from '#shared/state-keys'
+import { clearAuthToken } from '~/utils/auth-storage'
 
 interface ApiErrorShape {
   statusCode?: number
@@ -12,19 +13,16 @@ function isApiError(value: unknown): value is ApiErrorShape {
 }
 
 /**
- * Pre-configured `$fetch` instance with global error handling and SSR
- * cookie/header forwarding.
+ * Pre-configured `$fetch` instance with global error handling.
  *
- * Why we forward `cookie` manually: during SSR our composables call
- * `/api/calendar`, `/api/bookings`, etc. via `$fetch`. Without an explicit
- * cookie header, those requests reach our own Nitro server with no auth
- * context — server middleware sees no token, the route returns 401, and the
- * page renders empty. `useRequestHeaders(['cookie'])` reads the original
- * browser cookie sent to SSR and re-attaches it to the internal call.
+ * Auth: attaches `Authorization: Bearer <jwt>` from `useState(TOKEN)` on every
+ * request. That state is seeded on client boot by `plugins/auth-token.client`
+ * (from localStorage) and updated by `useAuth.login()`. No cookie forwarding
+ * — the app is Bearer-only since the iOS cookie-drop cleanup; the homepage
+ * is SPA (`routeRules.ssr=false`) so there's no SSR auth path either.
  *
- * On 401 from upstream we clear the in-memory `isLoggedIn` state (the
- * server has already deleted the httpOnly cookie inside `$faynatown`) and
- * navigate to /login via the captured Nuxt context.
+ * On 401 from upstream we clear the in-memory state + localStorage mirror
+ * and navigate to /login via the captured Nuxt context.
  *
  * Called from each composable's setup — `useI18n()` and `useToast()` require
  * component setup context, so we can't hoist this into a Nuxt plugin.
@@ -36,18 +34,12 @@ export function createApi() {
   const toast = useToast()
   const { t } = useI18n()
   const nuxtApp = useNuxtApp()
-  const ssrHeaders = import.meta.server ? useRequestHeaders(['cookie']) : undefined
 
   const token = useState<string | null>(STATE_KEY.TOKEN, () => null)
 
   return $fetch.create({
     onRequest({ options }) {
       const headers = new Headers(options.headers)
-      if (ssrHeaders?.cookie) headers.set('cookie', ssrHeaders.cookie)
-      // Attach the JWT as a Bearer header in addition to the httpOnly cookie.
-      // iOS Safari/ITP drops the cookie between SSR and client XHR on vercel.app,
-      // so relying on the cookie alone logs the user out on the first refetch.
-      // See `server/middleware/auth.ts` for the receiving side.
       if (token.value) headers.set('authorization', `Bearer ${token.value}`)
       options.headers = headers
     },
@@ -61,6 +53,9 @@ export function createApi() {
         const isLoggedIn = useState<boolean>(STATE_KEY.IS_LOGGED_IN)
         isLoggedIn.value = false
         token.value = null
+        // Drop the localStorage mirror too — otherwise the auth-token plugin
+        // would re-seed a dead JWT on the next boot and we'd loop back here.
+        clearAuthToken()
         toast.error(t('auth.sessionExpired'))
         nuxtApp.runWithContext(() => navigateTo('/login'))
         return

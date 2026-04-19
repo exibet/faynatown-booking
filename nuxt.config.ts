@@ -67,6 +67,17 @@ export default defineNuxtConfig({
     '~/assets/css/mobile.css',
   ],
 
+  // Render the homepage as SPA (no SSR). Reason: iOS Safari on *.vercel.app
+  // drops our httpOnly cookie on tab-kill/swipe-up, so SSR of `/` arrives with
+  // no auth and the route middleware would redirect to /login. With ssr:false,
+  // the client boots, `plugins/auth-token.client.ts` seeds state from
+  // localStorage, and middleware sees isLoggedIn=true before rendering. User
+  // data (calendar/bookings) fetches client-side anyway, so the SSR loss is
+  // imperceptible. /login keeps SSR (no auth needed to render the form).
+  routeRules: {
+    '/': { ssr: false },
+  },
+
   devServer: {
     port: 3500,
   },

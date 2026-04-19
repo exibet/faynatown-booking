@@ -26,14 +26,17 @@ describe('POST /api/auth/login', () => {
     await expectHttpError(() => handler(event), 401)
   })
 
-  it('returns ok + JWT in body when upstream returns a JWT', async () => {
+  it('returns ok + JWT in body when upstream returns a JWT (no cookie set)', async () => {
     const faynatown = vi.fn().mockResolvedValueOnce('eyJhbGciOi.test.jwt')
     setupServerMocks({ faynatown })
+    const setCookieSpy = globalThis.setCookie as unknown as ReturnType<typeof vi.fn>
     const { default: handler } = await import('~~/server/api/auth/login.post')
     const event = createMockEvent({ body: { phoneNumber: '380123456789', password: 'x' } })
     const result = await handler(event)
-    // Token is mirrored in the body so the client can attach
-    // Authorization: Bearer on subsequent XHR (iOS cookie drop workaround).
+    // Token is returned in the body; client persists it to localStorage and
+    // attaches Authorization: Bearer on subsequent XHR. Bearer-only auth —
+    // no cookie is set (iOS cookie-drop cleanup).
     expect(result).toEqual({ ok: true, token: 'eyJhbGciOi.test.jwt' })
+    expect(setCookieSpy).not.toHaveBeenCalled()
   })
 })
