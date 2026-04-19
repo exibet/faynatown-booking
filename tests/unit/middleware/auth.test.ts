@@ -1,13 +1,11 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { mockNuxtImport } from '@nuxt/test-utils/runtime'
 
-const { mockCookie, mockNavigateTo, mockState } = vi.hoisted(() => ({
-  mockCookie: vi.fn(),
+const { mockNavigateTo, mockState } = vi.hoisted(() => ({
   mockNavigateTo: vi.fn(),
   mockState: vi.fn(),
 }))
 
-mockNuxtImport('useCookie', () => mockCookie)
 mockNuxtImport('navigateTo', () => mockNavigateTo)
 mockNuxtImport('useState', () => mockState)
 
@@ -25,9 +23,8 @@ describe('auth middleware', () => {
     vi.clearAllMocks()
   })
 
-  it('redirects to /login when neither state nor cookie indicates auth', async () => {
+  it('redirects to /login when isLoggedIn state is false', async () => {
     mockState.mockReturnValue({ value: false })
-    mockCookie.mockReturnValue({ value: null })
     const { default: middleware } = await import('~/middleware/auth')
     middleware(route('/bookings'), route('/'))
     expect(mockNavigateTo).toHaveBeenCalledWith({
@@ -38,7 +35,6 @@ describe('auth middleware', () => {
 
   it('does not pass redirect query when coming from root', async () => {
     mockState.mockReturnValue({ value: false })
-    mockCookie.mockReturnValue({ value: null })
     const { default: middleware } = await import('~/middleware/auth')
     middleware(route('/'), route('/'))
     expect(mockNavigateTo).toHaveBeenCalledWith({
@@ -47,24 +43,10 @@ describe('auth middleware', () => {
     })
   })
 
-  it('allows navigation when cookie is present (SSR path)', async () => {
-    const stateRef = { value: false }
-    mockState.mockReturnValue(stateRef)
-    mockCookie.mockReturnValue({ value: 'valid.jwt.token' })
-    const { default: middleware } = await import('~/middleware/auth')
-    middleware(route('/bookings'), route('/'))
-    expect(mockNavigateTo).not.toHaveBeenCalled()
-    // middleware also bumps the in-memory state so subsequent client navs
-    // skip the cookie probe.
-    expect(stateRef.value).toBe(true)
-  })
-
-  it('allows navigation when isLoggedIn state is set (post-login client nav)', async () => {
+  it('allows navigation when isLoggedIn state is set (seeded by auth-token plugin)', async () => {
     mockState.mockReturnValue({ value: true })
-    mockCookie.mockReturnValue({ value: null })
     const { default: middleware } = await import('~/middleware/auth')
     middleware(route('/'), route('/'))
     expect(mockNavigateTo).not.toHaveBeenCalled()
-    expect(mockCookie).not.toHaveBeenCalled()
   })
 })

@@ -1,10 +1,14 @@
 import { LoginSchema } from '~~/server/schemas/auth'
-import { AUTH_COOKIE_MAX_AGE_SECONDS, AUTH_COOKIE_NAME } from '#shared/constants'
 
 /**
  * Authenticates user against Faynatown API. Upstream response is a plain-text
- * JWT (not JSON). On success, stores the token in an httpOnly cookie so the
- * browser never has direct access to it.
+ * JWT (not JSON). On success, returns the JWT in the body so the client can
+ * persist it in localStorage + `useState(STATE_KEY.TOKEN)` and attach
+ * `Authorization: Bearer` on every subsequent XHR.
+ *
+ * No server-set cookie: iOS Safari on *.vercel.app drops httpOnly cookies on
+ * tab-kill, and with `routeRules: { '/': { ssr: false } }` we have no SSR
+ * auth path that needs a cookie anyway — Bearer is the single wire channel.
  *
  * The upstream sometimes returns the JWT wrapped in JSON quotes ("eyJ...")
  * depending on Content-Type negotiation, so we strip surrounding quotes and
@@ -34,24 +38,5 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, statusMessage: 'loginError' })
   }
 
-  // `secure` is gated by both signals because `import.meta.dev` may be
-  // tree-shaken/replaced at build time and isn't always reliable inside Nitro
-  // runtime. Without this we'd set Secure on http://localhost in dev and the
-  // browser would silently drop the cookie → infinite /login redirects.
-  const isProd = !import.meta.dev && process.env.NODE_ENV === 'production'
-
-  setCookie(event, AUTH_COOKIE_NAME, token, {
-    httpOnly: true,
-    secure: isProd,
-    sameSite: 'lax',
-    path: '/',
-    maxAge: AUTH_COOKIE_MAX_AGE_SECONDS,
-  })
-
-  // Also return the JWT in the response body so the client can mirror it in
-  // `useState(STATE_KEY.TOKEN)` and attach `Authorization: Bearer` on every
-  // request. Necessary because iOS Safari/ITP on *.vercel.app silently drops
-  // our cookie between SSR and the first client-side XHR (see commit message
-  // of this change / auth middleware comment for the full story).
   return { ok: true, token }
 })

@@ -4,19 +4,13 @@ import { requireAuth } from '~~/server/utils/auth'
 import { VALID_JWT } from '../../../helpers/fixtures'
 
 describe('requireAuth', () => {
-  it('returns token when context has it', () => {
+  it('returns token when context has it (set by Bearer middleware)', () => {
     setupServerMocks()
     const event = createMockEvent({ token: VALID_JWT })
     expect(requireAuth(event)).toBe(VALID_JWT)
   })
 
-  it('falls back to cookie when context is empty', () => {
-    setupServerMocks()
-    const event = createMockEvent({ cookies: { faynatown_token: VALID_JWT } })
-    expect(requireAuth(event)).toBe(VALID_JWT)
-  })
-
-  it('throws 401 when neither context nor cookie has a token', () => {
+  it('throws 401 when context has no token', () => {
     setupServerMocks()
     const event = createMockEvent()
     expectHttpError(() => Promise.resolve(requireAuth(event)), 401)
