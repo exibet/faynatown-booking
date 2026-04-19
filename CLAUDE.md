@@ -34,7 +34,7 @@ Layering:
 
 ### Desktop vs Mobile
 
-Both `DesktopApp` and `MobileApp` are rendered simultaneously; CSS `@media (max-width: 799px)` toggles which one is visible. `pages/index.vue` calls the SYNC composables (`useCalendarSync`, `useBookingsSync`, `useFlatSync`) **exactly once** so each useAsyncData fetch fires once for both layouts. Nested components call the plain `useCalendar` / `useBookings` / `useFlat` accessors, which read via `useNuxtData` (hydration-safe).
+Both `DesktopApp` and `MobileApp` are rendered simultaneously; CSS media queries toggle which one is visible based on **orientation + width**, not width alone — iPhone landscape (844px) and iPad portrait (834px) have similar widths but opposite aspect ratios. Portrait + `<1024px` → mobile single-day list; landscape (any width) OR `≥1024px` → desktop week-grid. This gives iPad portrait the touch-friendly mobile UX while letting phone landscape see a weekly overview that fits its wide-short viewport. `pages/index.vue` calls the SYNC composables (`useCalendarSync`, `useBookingsSync`, `useFlatSync`) **exactly once** so each useAsyncData fetch fires once for both layouts. Nested components call the plain `useCalendar` / `useBookings` / `useFlat` accessors, which read via `useNuxtData` (hydration-safe).
 
 ### botc-tracker as reference
 
@@ -82,7 +82,7 @@ Styles split across four files loaded in Nuxt config order:
 1. `app/assets/css/tokens.css` — OKLCH colour tokens per `[data-theme]`, radii, row-h variable, font stacks
 2. `app/assets/css/base.css` — reset, body defaults, focus ring, scrollbars, shared primitives (`.ft-skel` skeleton + `@keyframes ftProgress` / `ftShimmer` / `ftToastIn` — used by both desktop and mobile)
 3. `app/assets/css/desktop.css` — `.ft-*` classes for header / week grid / popover / sidebar / toast host
-4. `app/assets/css/mobile.css` — `.mob`, `.mh`, `.ms`, `.mt`, `.ml`, `.mc`, `.sh-*` for the `<800px` layout
+4. `app/assets/css/mobile.css` — `.mob`, `.mh`, `.ms`, `.mt`, `.ml`, `.mc`, `.sh-*` for the portrait `<1024px` layout (phone portrait + tablet portrait; phone landscape gets the desktop grid)
 
 CSS-driven layout switch (not UA detection) — both component trees always mount; `pages/index.vue` only hides one via `@media`.
 

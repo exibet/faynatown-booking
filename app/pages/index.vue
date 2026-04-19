@@ -27,11 +27,22 @@ useWeatherSync()
 </template>
 
 <style scoped>
-.app-shell { height: 100vh; }
-@media (max-width: 799px) {
+/* `100dvh` = dynamic viewport height; accounts for iOS Safari's collapsing
+   URL bar whereas `100vh` locks to the post-collapse height and overflows
+   on load. */
+.app-shell { height: 100dvh; }
+/* Layout is chosen by orientation + width, not width alone — iPhone 12
+   Pro landscape (844×390) and iPad portrait (834×1194) have almost the
+   same width but opposite aspect ratios. Rules:
+   - Portrait + narrow (<1024px): mobile single-day list (phones and
+     tablets in portrait)
+   - Landscape (any width) OR wide (≥1024px): desktop week-grid
+   On phone landscape the grid is cramped vertically but now scrolls
+   thanks to `.ft-cal-body { overflow-y: auto }`. */
+@media (orientation: portrait) and (max-width: 1023px) {
   .layout-desktop { display: none; }
 }
-@media (min-width: 800px) {
+@media (orientation: landscape), (min-width: 1024px) {
   .layout-mobile { display: none; }
 }
 </style>
