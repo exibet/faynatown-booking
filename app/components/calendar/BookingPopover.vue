@@ -133,7 +133,7 @@ useEscape(() => emit('close'))
         <button
           v-if="noticeOpen"
           type="button"
-          class="ft-btn-primary"
+          class="ft-btn-primary is-warning"
           @click="emit('close')"
         >
           {{ t('common.ok') }}
