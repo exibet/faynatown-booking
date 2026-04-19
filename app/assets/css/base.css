@@ -112,7 +112,7 @@ a {
    --desktop / --mobile modifiers tune paddings + type for the surface. */
 .ft-notice {
   background: color-mix(in oklch, var(--bg), var(--warning) 10%);
-  border: 1px solid color-mix(in oklch, var(--line), var(--warning) 50%);
+  border: 1px solid var(--line);
   border-left: 3px solid var(--warning);
 }
 .ft-notice-title { font-weight: 600; color: var(--warning); margin-bottom: 6px; }
@@ -123,7 +123,8 @@ a {
   flex-shrink: 0;
   margin: 0 12px;
   border-radius: var(--radius);
-  padding: 10px 12px;
+  padding: 12px;
+  margin-bottom: 12px;
 }
 .ft-notice--desktop .ft-notice-title { font-size: 12px; }
 .ft-notice--desktop .ft-notice-p { font-size: 12px; }
@@ -131,7 +132,7 @@ a {
 .ft-notice--mobile {
   margin-bottom: 12px;
   border-radius: 10px;
-  padding: 12px 14px;
+  padding: 12px;
 }
 .ft-notice--mobile .ft-notice-title { font-size: 13px; }
 .ft-notice--mobile .ft-notice-p { font-size: 13px; }
