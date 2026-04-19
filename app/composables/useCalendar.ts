@@ -8,6 +8,12 @@ import { addDays, formatLocalDate, todayLocal } from '#shared/utils/datetime'
 import { initialOnlyCache } from '~/utils/async-data'
 import { getStoredBookingType, setStoredBookingType } from '~/utils/booking-type-storage'
 
+// Forward navigation cap: current week + this many windows ahead = the full
+// horizon the user can see. Enforced by `canNextWeek` / `nextWeek`. Bumping
+// this is a UX decision, not an API one — the fetch endpoint is week-scoped
+// and has no upstream horizon of its own.
+const MAX_WEEKS_AHEAD = 2
+
 // Private state keys shared between useCalendar() and useCalendarSync().
 // Grouped here so a typo creates a compile error instead of a silent second
 // state instance.
@@ -59,12 +65,23 @@ export function useCalendar() {
     return addDays(weekAnchor.value, -7).getTime() >= todayLocal().getTime()
   })
 
+  // Forward cap: user sees the current week + `MAX_WEEKS_AHEAD` further
+  // windows. Beyond that the upstream data is both uninteresting (bookings
+  // open on a rolling window) and an unbounded-request invitation — this
+  // keeps the data envelope to 3 weeks no matter how long the user holds
+  // the arrow.
+  const canNextWeek = computed(() => {
+    const maxAnchor = addDays(todayLocal(), 7 * MAX_WEEKS_AHEAD)
+    return addDays(weekAnchor.value, 7).getTime() <= maxAnchor.getTime()
+  })
+
   function prevWeek(): void {
     if (!canPrevWeek.value) return
     weekAnchor.value = addDays(weekAnchor.value, -7)
   }
 
   function nextWeek(): void {
+    if (!canNextWeek.value) return
     weekAnchor.value = addDays(weekAnchor.value, 7)
   }
 
@@ -89,6 +106,7 @@ export function useCalendar() {
     pending: readonly(pending),
     lastUpdated: readonly(lastUpdated),
     canPrevWeek,
+    canNextWeek,
     prevWeek,
     nextWeek,
     goToToday,

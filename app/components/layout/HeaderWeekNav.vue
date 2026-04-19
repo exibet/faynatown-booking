@@ -35,6 +35,7 @@ const range = computed(() => {
       type="button"
       class="ft-icon-btn"
       :aria-label="t('calendar.next')"
+      :disabled="!calendar.canNextWeek.value"
       @click="calendar.nextWeek"
     >
       <Icon name="chevron-right" />

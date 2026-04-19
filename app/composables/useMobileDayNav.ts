@@ -46,6 +46,7 @@ export function useMobileDayNav() {
   }
 
   function nextWeek(): void {
+    if (!calendar.canNextWeek.value) return
     calendar.nextWeek()
     dayOffset.value = 0
   }
@@ -58,5 +59,6 @@ export function useMobileDayNav() {
     prevWeek,
     nextWeek,
     canPrevWeek: calendar.canPrevWeek,
+    canNextWeek: calendar.canNextWeek,
   }
 }
