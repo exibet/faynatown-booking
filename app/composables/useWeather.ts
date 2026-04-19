@@ -1,7 +1,8 @@
 import { API } from '#shared/api'
+import { WEATHER_FORECAST_DAYS } from '#shared/constants'
 import { FETCH_KEY } from '#shared/fetch-keys'
 import type { WeatherDay, WeatherForecast } from '#shared/types'
-import { addDays, formatLocalDate } from '#shared/utils/datetime'
+import { addDays, formatLocalDate, todayLocal } from '#shared/utils/datetime'
 import { initialOnlyCache } from '~/utils/async-data'
 
 /**
@@ -28,33 +29,27 @@ export function useWeather() {
 
 /**
  * Registers the `useAsyncData` fetch. Must be called ONCE in `pages/index.vue`
- * (alongside the other `*Sync` composables) — calling it per layout would
- * queue two parallel Open-Meteo requests on every week change.
+ * (alongside the other `*Sync` composables).
  *
- * The range covers the full visible week and watches `weekAnchor`; the server
- * route clamps past dates + the 14-day ceiling, so we don't need a client-side
- * guard here.
+ * Fetches the full 14-day Open-Meteo window in one shot and keeps it in the
+ * Nuxt payload for the whole session — week navigation does NOT re-query.
+ * Open-Meteo accuracy drops sharply past 14 days and the server route
+ * clamps the window to `[today, today + WEATHER_FORECAST_DAYS - 1]` anyway,
+ * so there's nothing useful to refetch when the user pages forward.
  */
 export function useWeatherSync() {
   const api = createApi()
-  const calendar = useCalendar()
-
-  const range = computed(() => {
-    const start = calendar.weekAnchor.value
-    return {
-      start: formatLocalDate(start),
-      end: formatLocalDate(addDays(start, 6)),
-    }
-  })
+  const today = todayLocal()
+  const start = formatLocalDate(today)
+  const end = formatLocalDate(addDays(today, WEATHER_FORECAST_DAYS - 1))
 
   return useAsyncData<WeatherForecast>(
     FETCH_KEY.WEATHER,
     () => api<WeatherForecast>(API.WEATHER, {
-      query: { start: range.value.start, end: range.value.end },
+      query: { start, end },
     }),
     {
       default: () => [],
-      watch: [range],
       getCachedData: initialOnlyCache,
     },
   )

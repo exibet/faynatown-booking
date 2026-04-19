@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import { STATE_KEY } from '#shared/state-keys'
-import { addDays, todayLocal } from '#shared/utils/datetime'
+import { addDays, sameDay, todayLocal } from '#shared/utils/datetime'
 
 describe('useMobileDayNav', () => {
   beforeEach(() => {
@@ -8,44 +8,56 @@ describe('useMobileDayNav', () => {
     useState(STATE_KEY.MOBILE_DAY_OFFSET).value = 0
   })
 
-  it('nextDay() steps offset +1 inside the current week', () => {
+  it('currentDate mirrors weekAnchor + dayOffset', () => {
+    useState<number>(STATE_KEY.MOBILE_DAY_OFFSET).value = 3
     const nav = useMobileDayNav()
-    nav.nextDay()
-    expect(nav.dayOffset.value).toBe(1)
-    expect(nav.currentDate.value.getTime()).toBe(addDays(todayLocal(), 1).getTime())
+    expect(nav.currentDate.value.getTime()).toBe(addDays(todayLocal(), 3).getTime())
   })
 
-  it('nextDay() rolls into the next week when at offset 6', () => {
-    useState(STATE_KEY.MOBILE_DAY_OFFSET).value = 6
+  it('selectDay() moves the offset to a future day', () => {
     const nav = useMobileDayNav()
-    nav.nextDay()
-    const expected = addDays(todayLocal(), 7)
-    expect(nav.dayOffset.value).toBe(0)
-    // Anchor moved one week forward, offset reset to 0 → same absolute date.
-    expect(nav.currentDate.value.getTime()).toBe(expected.getTime())
-  })
-
-  it('prevDay() is a no-op when already on today', () => {
-    const nav = useMobileDayNav()
-    nav.prevDay()
-    expect(nav.dayOffset.value).toBe(0)
-    expect(nav.currentDate.value.getTime()).toBe(todayLocal().getTime())
+    nav.selectDay(4)
+    expect(nav.dayOffset.value).toBe(4)
+    expect(nav.currentDate.value.getTime()).toBe(addDays(todayLocal(), 4).getTime())
   })
 
   it('selectDay() rejects offsets that land on a past date', () => {
-    // Shift anchor one week forward so the strip spans today+7 .. today+13,
-    // then attempt to select an offset that maps before today.
-    useState<Date>(STATE_KEY.WEEK_ANCHOR).value = todayLocal()
-    const nav = useMobileDayNav()
-    // Offset 0 is today — selecting an offset that wraps backwards isn't
-    // representable because selectDay treats `target < today` as past.
-    // To exercise the branch, rewind anchor to yesterday and try selecting
-    // offset 0 (which lands on yesterday).
     useState<Date>(STATE_KEY.WEEK_ANCHOR).value = addDays(todayLocal(), -1)
+    useState<number>(STATE_KEY.MOBILE_DAY_OFFSET).value = 2
+    const nav = useMobileDayNav()
     nav.selectDay(0)
-    // Rejected — offset stays at whatever it was (0).
+    // Rejected — offset unchanged at its prior value.
+    expect(nav.dayOffset.value).toBe(2)
+  })
+
+  it('nextWeek() shifts anchor +7 days and resets offset to 0', () => {
+    useState<number>(STATE_KEY.MOBILE_DAY_OFFSET).value = 3
+    const nav = useMobileDayNav()
+    nav.nextWeek()
+    const anchor = useState<Date>(STATE_KEY.WEEK_ANCHOR).value
+    expect(sameDay(anchor, addDays(todayLocal(), 7))).toBe(true)
     expect(nav.dayOffset.value).toBe(0)
-    // currentDate is anchor + offset (yesterday + 0 = yesterday) — we just
-    // assert selectDay did not flip offset to 1 or similar.
+    expect(sameDay(nav.currentDate.value, addDays(todayLocal(), 7))).toBe(true)
+  })
+
+  it('prevWeek() is a no-op when current week already starts on today', () => {
+    useState<number>(STATE_KEY.MOBILE_DAY_OFFSET).value = 2
+    const nav = useMobileDayNav()
+    // Anchor == today → canPrevWeek false; nothing should change.
+    nav.prevWeek()
+    expect(useState<Date>(STATE_KEY.WEEK_ANCHOR).value.getTime()).toBe(todayLocal().getTime())
+    expect(nav.dayOffset.value).toBe(2)
+  })
+
+  it('prevWeek() shifts anchor -7 days and resets offset to 0 when future', () => {
+    // Put anchor one week ahead, simulating user having navigated forward.
+    useState<Date>(STATE_KEY.WEEK_ANCHOR).value = addDays(todayLocal(), 7)
+    useState<number>(STATE_KEY.MOBILE_DAY_OFFSET).value = 4
+    const nav = useMobileDayNav()
+    nav.prevWeek()
+    const anchor = useState<Date>(STATE_KEY.WEEK_ANCHOR).value
+    expect(sameDay(anchor, todayLocal())).toBe(true)
+    expect(nav.dayOffset.value).toBe(0)
+    expect(sameDay(nav.currentDate.value, todayLocal())).toBe(true)
   })
 })
