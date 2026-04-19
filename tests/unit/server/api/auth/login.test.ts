@@ -26,12 +26,14 @@ describe('POST /api/auth/login', () => {
     await expectHttpError(() => handler(event), 401)
   })
 
-  it('returns ok when upstream returns a JWT', async () => {
+  it('returns ok + JWT in body when upstream returns a JWT', async () => {
     const faynatown = vi.fn().mockResolvedValueOnce('eyJhbGciOi.test.jwt')
     setupServerMocks({ faynatown })
     const { default: handler } = await import('~~/server/api/auth/login.post')
     const event = createMockEvent({ body: { phoneNumber: '380123456789', password: 'x' } })
     const result = await handler(event)
-    expect(result).toEqual({ ok: true })
+    // Token is mirrored in the body so the client can attach
+    // Authorization: Bearer on subsequent XHR (iOS cookie drop workaround).
+    expect(result).toEqual({ ok: true, token: 'eyJhbGciOi.test.jwt' })
   })
 })
