@@ -1,9 +1,11 @@
 /* ------------------------------------------------------------
    Faynatown Booking — mobile / tablet-portrait styles
    Class prefix: .mob, .mh, .ms, .mt, .ml, .mc, .sh-*
-   Activated when viewport width < 1024px — everything from phone
-   portrait up to iPad portrait uses single-day focus + natural scroll.
-   Desktop week-grid only activates on laptop/desktop widths (≥ 1024px).
+   Activated in portrait orientation at viewport width < 1024px
+   (phones and tablets held vertically). Landscape orientation — even
+   on phones — gets the desktop week-grid, because a wide-short
+   viewport shows weekly overview better than a single-day list.
+   See `pages/index.vue` for the exact media-query switch.
 ------------------------------------------------------------ */
 
 .mob {

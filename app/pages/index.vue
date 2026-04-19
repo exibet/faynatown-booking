@@ -31,15 +31,18 @@ useWeatherSync()
    URL bar whereas `100vh` locks to the post-collapse height and overflows
    on load. */
 .app-shell { height: 100dvh; }
-/* Desktop week-grid is designed for mouse hover + keyboard nav with all
-   15 hourly rows fitting into viewport (see `useAdaptiveRowHeight`). On
-   touch devices, single-day focus + natural scroll is a better UX —
-   route iPad portrait (834px) and smaller into the mobile layout by
-   flipping the breakpoint to the iPad-landscape boundary (1024px). */
-@media (max-width: 1023px) {
+/* Layout is chosen by orientation + width, not width alone — iPhone 12
+   Pro landscape (844×390) and iPad portrait (834×1194) have almost the
+   same width but opposite aspect ratios. Rules:
+   - Portrait + narrow (<1024px): mobile single-day list (phones and
+     tablets in portrait)
+   - Landscape (any width) OR wide (≥1024px): desktop week-grid
+   On phone landscape the grid is cramped vertically but now scrolls
+   thanks to `.ft-cal-body { overflow-y: auto }`. */
+@media (orientation: portrait) and (max-width: 1023px) {
   .layout-desktop { display: none; }
 }
-@media (min-width: 1024px) {
+@media (orientation: landscape), (min-width: 1024px) {
   .layout-mobile { display: none; }
 }
 </style>
