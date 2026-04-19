@@ -75,8 +75,12 @@ export type BookingTypeParam = BookingType['param']
 export type BookingTypeId = BookingType['id']
 export type BookingUnitLabel = BookingType['unitLabel']
 
-/** Default type when user state is empty — Paddle Tennis (most popular). */
-export const DEFAULT_BOOKING_TYPE: BookingTypeParam = 'Paddle_Tennis'
+/**
+ * Default type when user state is empty — first item of the type list,
+ *  matching the first chip the user sees in the picker. Overridden on the
+ *  client by the last-remembered type from `BOOKING_TYPE_STORAGE_KEY`.
+ */
+export const DEFAULT_BOOKING_TYPE: BookingTypeParam = BOOKING_TYPES[0].param
 
 // Tuple (not array) so Zod's `z.enum` accepts it without a cast.
 export const BOOKING_TYPE_PARAMS = [
@@ -127,6 +131,11 @@ export const FAYNATOWN_BASE_URL = 'https://webapi.faynatown.com.ua/api'
 // `plugins/auth-token.client.ts` to seed the in-memory state before the auth
 // middleware runs. Cleared on logout or upstream 401.
 export const AUTH_STORAGE_KEY = 'faynatown:token'
+
+// localStorage key for the last-picked booking type. Persisted so a user who
+// mostly uses, say, Paddle Tennis doesn't have to re-select it on every visit.
+// Read at `useState` init time by `useCalendar`, written on each `setType()`.
+export const BOOKING_TYPE_STORAGE_KEY = 'faynatown:booking-type'
 
 // Suffixes the API appends to text fields when an item is unavailable.
 // We detect both and strip them when rendering.

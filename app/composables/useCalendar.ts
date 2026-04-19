@@ -6,6 +6,7 @@ import type { BookingTypeParam } from '#shared/constants'
 import type { CalendarWeek } from '#shared/types'
 import { addDays, formatLocalDate, todayLocal } from '#shared/utils/datetime'
 import { initialOnlyCache } from '~/utils/async-data'
+import { getStoredBookingType, setStoredBookingType } from '~/utils/booking-type-storage'
 
 // Private state keys shared between useCalendar() and useCalendarSync().
 // Grouped here so a typo creates a compile error instead of a silent second
@@ -20,7 +21,10 @@ const K = {
 
 function calendarState() {
   const weekAnchor = useState<Date>(K.WEEK_ANCHOR, () => todayLocal())
-  const selectedType = useState<BookingTypeParam>(K.SELECTED_TYPE, () => DEFAULT_BOOKING_TYPE)
+  const selectedType = useState<BookingTypeParam>(
+    K.SELECTED_TYPE,
+    () => getStoredBookingType() ?? DEFAULT_BOOKING_TYPE,
+  )
   const pending = useState<boolean>(K.PENDING, () => false)
   const lastUpdated = useState<Date | null>(K.LAST_UPDATED, () => null)
   const refreshTick = useState<number>(K.REFRESH_TICK, () => 0)
@@ -70,6 +74,7 @@ export function useCalendar() {
 
   function setType(type: BookingTypeParam): void {
     selectedType.value = type
+    setStoredBookingType(type)
   }
 
   function refresh(): void {

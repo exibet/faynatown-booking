@@ -59,7 +59,14 @@ describe('shared/constants', () => {
 
   it('typeIdOf returns the id for a known type', () => {
     expect(typeIdOf('BBQ')).toBe(1)
-    expect(typeIdOf(DEFAULT_BOOKING_TYPE)).toBe(6)
+    expect(typeIdOf('Paddle_Tennis')).toBe(6)
+  })
+
+  it('DEFAULT_BOOKING_TYPE tracks the first entry of BOOKING_TYPES', () => {
+    // Used as the fallback when the client has no stored booking-type — must
+    // always resolve to a real entry so `findBookingType` never returns
+    // undefined on a fresh install.
+    expect(typeIdOf(DEFAULT_BOOKING_TYPE)).toBe(1)
   })
 
   it('UNAVAILABLE_SUFFIXES contains both Ukrainian suffixes', () => {
