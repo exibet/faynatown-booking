@@ -7,7 +7,9 @@
 .ft-app {
   display: grid;
   grid-template-rows: auto 1fr;
-  height: 100vh;
+  /* `dvh` (dynamic viewport) — accurate on browsers with collapsing chrome;
+     `vh` locks to the post-collapse height and causes overflow on load. */
+  height: 100dvh;
   background: var(--bg);
 }
 .ft-main {
@@ -203,7 +205,13 @@
 .ft-cal-body {
   display: grid;
   grid-template-columns: 56px repeat(7, 1fr);
-  overflow: hidden;
+  /* Vertical scroll as a safety net: `useAdaptiveRowHeight` normally sizes
+     rows to fit the viewport, but it clamps at `min: 44px` and can also
+     over-estimate on browsers where `clientHeight` reports a pre-chrome
+     value. If total row height ends up taller than the body, scroll kicks
+     in instead of rows being silently clipped off-screen. */
+  overflow-x: hidden;
+  overflow-y: auto;
   flex: 1;
   min-height: 0;
   scrollbar-width: thin;
@@ -558,7 +566,7 @@
 
 /* Login (desktop + mobile share) */
 .login-root {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: flex; align-items: center; justify-content: center;
   background: var(--bg);
   padding: 16px;

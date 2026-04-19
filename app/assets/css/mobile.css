@@ -1,13 +1,17 @@
 /* ------------------------------------------------------------
-   Faynatown Booking — mobile styles
+   Faynatown Booking — mobile / tablet-portrait styles
    Class prefix: .mob, .mh, .ms, .mt, .ml, .mc, .sh-*
-   Activated when viewport width < 800px.
+   Activated when viewport width < 1024px — everything from phone
+   portrait up to iPad portrait uses single-day focus + natural scroll.
+   Desktop week-grid only activates on laptop/desktop widths (≥ 1024px).
 ------------------------------------------------------------ */
 
 .mob {
   background: var(--bg);
   color: var(--ink);
-  height: 100vh;
+  /* `dvh` handles iOS Safari's collapsing URL bar; `vh` would lock to the
+     post-collapse height and push the calendar below the fold. */
+  height: 100dvh;
   display: flex;
   flex-direction: column;
   font-family: var(--font-ui);
