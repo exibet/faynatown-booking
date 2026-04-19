@@ -282,7 +282,19 @@
 .sh-head button svg { width: 18px; height: 18px; }
 .sh-body {
   overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
   padding: 14px 16px;
+}
+
+/* Pinned footer inside the bottom sheet — hosts elements that should stay
+   visible as the body scrolls (e.g. the captcha notice + confirm button in
+   `SlotInfoSheet`). Mirrors `.ft-pop-foot` on desktop. */
+.sh-foot {
+  flex-shrink: 0;
+  padding: 10px 16px 0;
+  border-top: 1px solid var(--line);
+  background: var(--bg-2);
 }
 
 .sh-section-label {
@@ -391,6 +403,10 @@
 .sh-confirm:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+.sh-confirm.is-warning {
+  background: var(--warning);
+  color: var(--on-warning);
 }
 
 /* Toast styles are in desktop.css (`.ft-toast*`) and shared across layouts. */

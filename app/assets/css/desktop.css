@@ -539,6 +539,10 @@
   cursor: not-allowed;
   filter: none;
 }
+.ft-btn-primary.is-warning {
+  background: var(--warning);
+  color: var(--on-warning);
+}
 .ft-btn-danger {
   padding: 7px 14px;
   border-radius: var(--radius);

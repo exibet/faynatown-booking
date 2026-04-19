@@ -38,6 +38,12 @@ useEscape(() => emit('close'))
             <div class="sh-body">
               <slot />
             </div>
+            <div
+              v-if="$slots.footer"
+              class="sh-foot"
+            >
+              <slot name="footer" />
+            </div>
           </div>
         </div>
       </template>

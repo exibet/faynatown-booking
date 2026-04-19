@@ -76,27 +76,29 @@ watch(() => [props.open, props.cell?.startHour, props.date], () => {
       @pick="pick"
     />
 
-    <CaptchaNotice
-      v-if="noticeOpen"
-      variant="mobile"
-    />
+    <template #footer>
+      <CaptchaNotice
+        v-if="noticeOpen"
+        variant="mobile"
+      />
 
-    <button
-      v-if="noticeOpen"
-      type="button"
-      class="sh-confirm"
-      @click="emit('close')"
-    >
-      {{ t('common.ok') }}
-    </button>
-    <button
-      v-else
-      type="button"
-      class="sh-confirm"
-      :disabled="!picked"
-      @click="requestBooking"
-    >
-      {{ t('zones.book') }}
-    </button>
+      <button
+        v-if="noticeOpen"
+        type="button"
+        class="sh-confirm is-warning"
+        @click="emit('close')"
+      >
+        {{ t('common.ok') }}
+      </button>
+      <button
+        v-else
+        type="button"
+        class="sh-confirm"
+        :disabled="!picked"
+        @click="requestBooking"
+      >
+        {{ t('zones.book') }}
+      </button>
+    </template>
   </BottomSheet>
 </template>
