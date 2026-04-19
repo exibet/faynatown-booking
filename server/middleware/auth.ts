@@ -14,10 +14,15 @@ export default defineEventHandler((event) => {
   if (event.path?.startsWith('/api/') && !event.path.startsWith('/api/auth/')) {
     const cookieHeader = getHeader(event, 'cookie') ?? ''
     const ua = getHeader(event, 'user-agent')?.slice(0, 40) ?? ''
+    const names = cookieHeader
+      .split(';')
+      .map(s => s.trim().split('=')[0])
+      .filter(Boolean)
+      .join(',')
     // eslint-disable-next-line no-console
     console.warn(
       `[auth-diag] path=${event.path} hasCookie=${!!token} `
-      + `cookieHeaderLen=${cookieHeader.length} ua=${ua}`,
+      + `cookieHeaderLen=${cookieHeader.length} names=[${names}] ua=${ua}`,
     )
   }
 })
