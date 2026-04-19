@@ -131,12 +131,12 @@ export const AUTH_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 89
 // We detect both and strip them when rendering.
 export const UNAVAILABLE_SUFFIXES = ['(недоступно)', '(зайнято)'] as const
 
-// Faynatown residential complex coordinates (Kyiv, Troieshchyna).
+// Faynatown residential complex coordinates (Kyiv).
 // Used as a fixed location for the Open-Meteo weather forecast — every user
 // sees the same forecast regardless of where they currently are.
 export const FAYNATOWN_COORDS = {
-  latitude: 50.5203,
-  longitude: 30.6234,
+  latitude: 50.4700198,
+  longitude: 30.3989502,
   timezone: 'Europe/Kyiv',
 } as const
 
