@@ -33,18 +33,18 @@
     "@emnapi/runtime": "^1.10.0",
     "@fontsource/inter-tight": "^5.2.7",
     "@nuxt/eslint": "^1.15.2",
-    "@nuxt/test-utils": "^4.0.0",
+    "@nuxt/test-utils": "^4.0.3",
     "@playwright/test": "^1.59.1",
     "@resvg/resvg-wasm": "^2.6.2",
-    "@vitest/coverage-istanbul": "^4.1.4",
+    "@vitest/coverage-istanbul": "^4.1.5",
     "@vitest/coverage-v8": "^4.1.4",
-    "@vue/language-core": "^3.2.6",
-    "@vue/test-utils": "^2.4.6",
+    "@vue/language-core": "^3.2.7",
+    "@vue/test-utils": "^2.4.9",
     "happy-dom": "^20.8.9",
     "husky": "^9.1.7",
     "lint-staged": "^16.4.0",
     "vitest": "^4.1.2",
-    "vue-tsc": "^3.2.6"
+    "vue-tsc": "^3.2.7"
   },
   "lint-staged": {
     "*.{ts,vue,mjs}": "eslint --fix"
